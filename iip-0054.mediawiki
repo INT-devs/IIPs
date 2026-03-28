@@ -71,12 +71,14 @@ ln.seed.example.com. IN TXT "ln1qp...xyz@192.168.1.1:2216"
 ===DNS Seeds===
 
 Mainnet:
-* ln.seed1.international-coin.org
-* ln.seed2.international-coin.org
+* ln.seed1.international-coin.org (US)
+* ln.seed2.international-coin.org (EU)
+* ln.seed3.international-coin.org (UK)
 
 Testnet:
-* lnt.seed1.international-coin.org
-* lnt.seed2.international-coin.org
+* test1.international-coin.org (US)
+* test2.international-coin.org (EU)
+* test3.international-coin.org (UK)
 
 ===TXT Record Chunking===
 
