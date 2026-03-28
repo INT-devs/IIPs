@@ -1,0 +1,168 @@
+<pre>
+  IIP: 7
+  Title: Relative Lock-Time Using Sequence Numbers
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 6
+</pre>
+
+==Abstract==
+
+This IIP repurposes the transaction input sequence number field to encode relative lock-times. A relative lock-time specifies the minimum age of the input (in blocks or time) before the transaction can be included in a block. It is adapted from BIP 68 for INTcoin.
+
+==Motivation==
+
+Absolute lock-times (IIP-6) are useful but have limitations:
+
+* Require knowing the exact future block height or time
+* Cannot express "wait N blocks after funding"
+* Inefficient for payment channels (must update locktime)
+
+Relative lock-times enable:
+
+* '''Payment Channels''': Revocable outputs with fixed delay
+* '''Lightning Network''': Commitment transaction delays
+* '''Atomic Swaps''': Timeout relative to contract creation
+* '''Vaults''': Spending delay after initiation
+
+==Specification==
+
+===Sequence Number Encoding===
+
+The 32-bit nSequence field is interpreted as follows when the disable flag is not set:
+
+<pre>
+Bit 31 (DISABLE_FLAG):     If set, nSequence is ignored for relative lock-time
+Bit 22 (TYPE_FLAG):        If set, interpret as time-based; otherwise block-based
+Bits 0-15 (VALUE):         The lock-time value
+
+  31                 22                  16                   0
+  |                  |                   |                    |
+  [D][------------][T][----------------][       VALUE        ]
+   |       unused    |       unused              |
+   |                 |                           |
+   DISABLE_FLAG     TYPE_FLAG             16-bit value
+</pre>
+
+===Lock-Time Calculation===
+
+'''Block-based''' (TYPE_FLAG = 0):
+<pre>
+required_height = input_height + VALUE
+</pre>
+
+'''Time-based''' (TYPE_FLAG = 1):
+<pre>
+required_time = input_MTP + (VALUE * 512)
+</pre>
+
+Where:
+* input_height = height of block containing the UTXO
+* input_MTP = median time past of that block
+* 512 = granularity in seconds (~8.5 minutes)
+
+===Consensus Rules===
+
+For each input where DISABLE_FLAG is not set:
+
+<pre>
+if TYPE_FLAG == 0:
+    # Block-based
+    if current_height < input_height + VALUE:
+        return INVALID
+else:
+    # Time-based
+    if current_MTP < input_MTP + (VALUE * 512):
+        return INVALID
+</pre>
+
+===Constants===
+
+<pre>
+SEQUENCE_DISABLE_FLAG   = (1 << 31)  # 0x80000000
+SEQUENCE_TYPE_FLAG      = (1 << 22)  # 0x00400000
+SEQUENCE_LOCKTIME_MASK  = 0x0000ffff
+SEQUENCE_GRANULARITY    = 512        # seconds
+</pre>
+
+===Maximum Values===
+
+{| class="wikitable"
+|-
+! Type !! Maximum Value !! Real Duration
+|-
+| Blocks || 65535 || ~91 days (at 2-min blocks)
+|-
+| Time || 65535 × 512 || ~388 days
+|}
+
+==Rationale==
+
+===Why Sequence Numbers?===
+
+The nSequence field was originally intended for transaction replacement but was never widely used. Repurposing it:
+* Requires no new transaction fields
+* Maintains backward compatibility
+* Enables per-input relative locks
+
+===512-Second Granularity===
+
+The 512-second granularity:
+* Allows ~388 days maximum with 16 bits
+* Provides sufficient precision for most use cases
+* Aligns with Bitcoin for cross-chain compatibility
+
+===Disable Flag===
+
+The disable flag allows:
+* Opt-out of relative lock-time semantics
+* Compatibility with legacy sequence number uses
+* RBF signaling (sequences < 0xffffffff-1)
+
+==Backwards Compatibility==
+
+Transactions with nSequence = 0xffffffff are unaffected (disable flag set).
+
+This is a soft fork: old nodes will accept transactions that new nodes reject.
+
+==Interaction with Other IIPs==
+
+* '''IIP-6 (CLTV)''': Absolute and relative locks can be combined
+* '''IIP-8 (CSV)''': Script-level enforcement of relative locks
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/consensus/tx_verify.cpp src/consensus/tx_verify.cpp]
+
+==Test Vectors==
+
+{| class="wikitable"
+|-
+! nSequence !! Interpretation !! Lock Duration
+|-
+| 0x00000000 || 0 blocks || Immediate
+|-
+| 0x00000064 || 100 blocks || ~200 minutes
+|-
+| 0x00400064 || 100 × 512 seconds || ~14 hours
+|-
+| 0x80000000 || Disabled || None (disable flag set)
+|-
+| 0xffffffff || Disabled || None (disable flag set)
+|-
+| 0x0000ffff || 65535 blocks || ~91 days
+|}
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0068.mediawiki BIP 68: Relative lock-time using consensus-enforced sequence numbers]
+* [[iip-0006.mediawiki|IIP-6: OP_CHECKLOCKTIMEVERIFY]]
+* [[iip-0008.mediawiki|IIP-8: OP_CHECKSEQUENCEVERIFY]]
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,186 @@
+<pre>
+  IIP: 8
+  Title: OP_CHECKSEQUENCEVERIFY
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 7
+</pre>
+
+==Abstract==
+
+This IIP describes the OP_CHECKSEQUENCEVERIFY (CSV) opcode which allows a transaction output to be made unspendable until a relative time or block count has passed since the output was confirmed. It is adapted from BIP 112 for INTcoin.
+
+==Motivation==
+
+While IIP-7 defines relative lock-time semantics for sequence numbers, script authors need a way to enforce these constraints. OP_CHECKSEQUENCEVERIFY provides script-level enforcement, enabling:
+
+* '''Bidirectional Payment Channels''': Revocable outputs with enforced delay
+* '''Lightning Network''': HTLC timeout enforcement
+* '''Vault Contracts''': Mandatory waiting periods
+* '''Inheritance Schemes''': Time-delayed access
+
+==Specification==
+
+===Opcode Definition===
+
+<pre>
+OP_CHECKSEQUENCEVERIFY = 0xb2
+</pre>
+
+When executed:
+
+# If the stack is empty, fail
+# If the top stack item is negative, fail
+# If the top stack item has the disable flag (bit 31) set, continue without further checks
+# If the transaction version is less than 2, fail
+# If the input's nSequence has the disable flag set, fail
+# If the type flags don't match (stack bit 22 vs nSequence bit 22), fail
+# If the stack value (masked) is greater than nSequence (masked), fail
+# Otherwise, continue (the stack is not modified)
+
+===Pseudocode===
+
+<pre>
+def op_checksequenceverify(stack, tx, input_index):
+    if len(stack) < 1:
+        return False
+
+    sequence = stack[-1]  # Don't pop
+
+    if sequence < 0:
+        return False
+
+    DISABLE_FLAG = 1 << 31
+    TYPE_FLAG = 1 << 22
+    MASK = 0x0000ffff
+
+    # If disable flag set in script, pass
+    if sequence & DISABLE_FLAG:
+        return True
+
+    # Require transaction version >= 2
+    if tx.nVersion < 2:
+        return False
+
+    input_seq = tx.vin[input_index].nSequence
+
+    # If disable flag set in input, fail
+    if input_seq & DISABLE_FLAG:
+        return False
+
+    # Type flags must match
+    if (sequence & TYPE_FLAG) != (input_seq & TYPE_FLAG):
+        return False
+
+    # Compare values
+    if (sequence & MASK) > (input_seq & MASK):
+        return False
+
+    return True
+</pre>
+
+===Script Examples===
+
+'''Relative time lock (144 blocks ≈ 288 minutes):'''
+
+<pre>
+<144> OP_CHECKSEQUENCEVERIFY OP_DROP <pubkey> OP_CHECKSIG_DILITHIUM
+</pre>
+
+'''Time-based lock (1 day ≈ 169 units):'''
+
+<pre>
+<0x00400000 + 169> OP_CHECKSEQUENCEVERIFY OP_DROP <pubkey> OP_CHECKSIG_DILITHIUM
+</pre>
+
+'''Revocable output (Lightning commitment):'''
+
+<pre>
+OP_IF
+    <revocation_pubkey> OP_CHECKSIG_DILITHIUM
+OP_ELSE
+    <144> OP_CHECKSEQUENCEVERIFY OP_DROP
+    <local_pubkey> OP_CHECKSIG_DILITHIUM
+OP_ENDIF
+</pre>
+
+==Rationale==
+
+===Transaction Version Check===
+
+Requiring version >= 2 ensures:
+* Old transactions are unaffected
+* Clear opt-in to relative lock-time semantics
+* Forward compatibility
+
+===Disable Flag in Stack Value===
+
+Allowing the disable flag in the script value:
+* Enables conditional CSV (using OP_IF branches)
+* Matches nSequence semantics
+
+===Type Flag Matching===
+
+Requiring matching type flags prevents:
+* Comparing blocks to time (nonsensical)
+* Accidentally satisfying locks with wrong units
+
+==Backwards Compatibility==
+
+OP_CHECKSEQUENCEVERIFY was previously OP_NOP3. Scripts using OP_NOP3:
+* Continue to work (CSV is a soft fork restriction)
+* Now have semantic meaning with appropriate values
+
+==Interaction with Other IIPs==
+
+* '''IIP-6 (CLTV)''': Can combine absolute and relative locks
+* '''IIP-7 (Sequence)''': CSV enforces IIP-7 semantics in scripts
+
+Example combining both:
+
+<pre>
+<500000> OP_CHECKLOCKTIMEVERIFY OP_DROP
+<144> OP_CHECKSEQUENCEVERIFY OP_DROP
+<pubkey> OP_CHECKSIG_DILITHIUM
+</pre>
+
+This requires:
+* Block 500000 to be reached (absolute)
+* AND 144 blocks since the UTXO was created (relative)
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/script/interpreter.cpp src/script/interpreter.cpp]
+
+==Test Vectors==
+
+{| class="wikitable"
+|-
+! Stack Value !! nSequence !! nVersion !! Result
+|-
+| 100 || 100 || 2 || Valid
+|-
+| 100 || 99 || 2 || Invalid (sequence too low)
+|-
+| 100 || 100 || 1 || Invalid (version < 2)
+|-
+| 0x80000000 || any || 2 || Valid (disabled in script)
+|-
+| 100 || 0x80000064 || 2 || Invalid (disabled in input)
+|-
+| 0x00400064 || 0x00000064 || 2 || Invalid (type mismatch)
+|}
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki BIP 112: CHECKSEQUENCEVERIFY]
+* [[iip-0006.mediawiki|IIP-6: OP_CHECKLOCKTIMEVERIFY]]
+* [[iip-0007.mediawiki|IIP-7: Relative Lock-Time Using Sequence Numbers]]
+
+==Copyright==
+
+This document is placed in the public domain.

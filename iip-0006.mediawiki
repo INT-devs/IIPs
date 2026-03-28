@@ -1,0 +1,143 @@
+<pre>
+  IIP: 6
+  Title: OP_CHECKLOCKTIMEVERIFY
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes the OP_CHECKLOCKTIMEVERIFY (CLTV) opcode which allows a transaction output to be made unspendable until a specified block height or time. It is adapted from BIP 65 for INTcoin.
+
+==Motivation==
+
+Time-locked transactions enable important use cases:
+
+* '''Payment Channels''': Refund transactions that become valid after a timeout
+* '''Escrow''': Funds locked until a future date
+* '''Inheritance''': Coins accessible by heirs after a delay
+* '''Hash Time-Locked Contracts (HTLCs)''': Foundation of Lightning Network
+
+Without CLTV, nLockTime can be modified by the spender, providing no guarantee to other parties.
+
+==Specification==
+
+===Opcode Definition===
+
+<pre>
+OP_CHECKLOCKTIMEVERIFY = 0xb1
+</pre>
+
+When executed:
+
+# If the stack is empty, fail
+# If the top stack item is negative, fail
+# If the top stack item is greater than or equal to 500000000 and nLockTime is less than 500000000, or vice versa, fail
+# If the top stack item is greater than the transaction's nLockTime, fail
+# If the transaction input's nSequence is 0xffffffff, fail
+# Otherwise, continue (the stack is not modified)
+
+===Semantics===
+
+The top stack value represents either:
+* '''Block height''': If < 500000000
+* '''Unix timestamp''': If >= 500000000
+
+The transaction's nLockTime must be of the same type and be >= the stack value.
+
+===Script Example===
+
+Time-locked output (spendable after block 100000):
+
+<pre>
+<100000> OP_CHECKLOCKTIMEVERIFY OP_DROP <pubkey> OP_CHECKSIG_DILITHIUM
+</pre>
+
+To spend, the transaction must have:
+* nLockTime >= 100000
+* nSequence < 0xffffffff on the input
+
+===Pseudocode===
+
+<pre>
+def op_checklocktimeverify(stack, tx, input_index):
+    if len(stack) < 1:
+        return False
+
+    locktime = stack[-1]  # Don't pop
+
+    if locktime < 0:
+        return False
+
+    # Check type match (height vs time)
+    LOCKTIME_THRESHOLD = 500000000
+    if ((locktime >= LOCKTIME_THRESHOLD) != (tx.nLockTime >= LOCKTIME_THRESHOLD)):
+        return False
+
+    if locktime > tx.nLockTime:
+        return False
+
+    if tx.vin[input_index].nSequence == 0xffffffff:
+        return False
+
+    return True
+</pre>
+
+==Rationale==
+
+===Why Not Pop?===
+
+CLTV leaves the value on the stack (requiring OP_DROP after) to allow:
+* Verification without modifying stack state
+* Combining with other checks on the same value
+
+===Sequence Check===
+
+nSequence must be < 0xffffffff because:
+* nSequence = 0xffffffff disables nLockTime
+* This would make the CLTV check meaningless
+* Failing in this case catches script errors
+
+===Type Mixing Prevention===
+
+Comparing height to time would be nonsensical:
+* Block 500000000 will never exist
+* Timestamp 100000 was in 1970
+
+==Backwards Compatibility==
+
+OP_CHECKLOCKTIMEVERIFY was previously OP_NOP2. Scripts using OP_NOP2 will:
+* Continue to work (CLTV is a soft fork restriction)
+* Now have semantic meaning if a value is on the stack
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/script/interpreter.cpp src/script/interpreter.cpp]
+
+==Test Vectors==
+
+{| class="wikitable"
+|-
+! Script !! nLockTime !! nSequence !! Result
+|-
+| <100> CLTV DROP <pk> CHECKSIG || 100 || 0 || Valid
+|-
+| <100> CLTV DROP <pk> CHECKSIG || 99 || 0 || Invalid (locktime too low)
+|-
+| <100> CLTV DROP <pk> CHECKSIG || 100 || 0xffffffff || Invalid (sequence disables locktime)
+|-
+| <500000001> CLTV DROP <pk> CHECKSIG || 100 || 0 || Invalid (type mismatch)
+|}
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki BIP 65: OP_CHECKLOCKTIMEVERIFY]
+* [[iip-0007.mediawiki|IIP-7: Relative Lock-Time Using Sequence Numbers]]
+
+==Copyright==
+
+This document is placed in the public domain.

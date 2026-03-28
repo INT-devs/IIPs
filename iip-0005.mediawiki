@@ -1,0 +1,140 @@
+<pre>
+  IIP: 5
+  Title: Block Height in Coinbase
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP requires the block height to be encoded in the coinbase transaction's scriptSig. This ensures all coinbase transactions have unique transaction identifiers. It is adapted from BIP 34 for INTcoin.
+
+==Motivation==
+
+Coinbase transactions have no inputs referencing previous outputs, making them potentially non-unique. Two blocks at different heights could theoretically have identical coinbase transactions, creating duplicate txids.
+
+By requiring the block height in the coinbase, each coinbase transaction becomes unique, preventing duplicate txid issues permanently.
+
+==Specification==
+
+===Consensus Rule===
+
+The coinbase transaction's scriptSig must begin with a push of the block height:
+
+<pre>
+scriptSig = <height> ...
+</pre>
+
+Where <code><height></code> is the block height encoded as a minimally-encoded signed integer using CScriptNum serialization.
+
+===Height Encoding===
+
+The height is encoded as follows:
+
+{| class="wikitable"
+|-
+! Height Range !! Bytes !! Example (height 500000)
+|-
+| 0 || 1 byte: 0x00 || 0x00
+|-
+| 1-127 || 1 byte: height || 0x7f (127)
+|-
+| 128-32767 || 2 bytes: OP_PUSHDATA1 + bytes || 0x02 0x20 0xa1 (500000 = 0x07a120)
+|-
+| 32768-8388607 || 3 bytes || 0x03 + 3 bytes
+|-
+| > 8388607 || 4+ bytes || 0x04 + 4 bytes
+|}
+
+===Validation===
+
+<pre>
+CScript scriptSig = coinbase.vin[0].scriptSig;
+CScript::const_iterator it = scriptSig.begin();
+opcodetype opcode;
+std::vector<unsigned char> data;
+
+// Read the push operation
+if (!scriptSig.GetOp(it, opcode, data)) {
+    return false;  // Empty scriptSig
+}
+
+// Decode as CScriptNum
+CScriptNum height(data, true, 5);  // fRequireMinimal=true
+
+if (height.GetInt64() != expected_height) {
+    return false;  // Height mismatch
+}
+
+// Height must be non-negative
+if (height.GetInt64() < 0) {
+    return false;
+}
+</pre>
+
+===Activation===
+
+This rule is active from the genesis block (height 0).
+
+==Rationale==
+
+===Why From Genesis?===
+
+Unlike Bitcoin (which activated BIP 34 at height 227,931), INTcoin enforces this from genesis because:
+* No legacy chain to maintain compatibility with
+* Stronger guarantees from the start
+* Simpler implementation (no activation height check)
+
+===Minimal Encoding===
+
+Requiring minimal encoding prevents malleability:
+* Height 0 must be encoded as OP_0 (0x00), not 0x01 0x00
+* Height 1 must be 0x01 0x01, not 0x02 0x01 0x00
+
+===Interaction with IIP-4===
+
+Combined with IIP-4 (duplicate transaction prevention), this IIP guarantees:
+* All coinbase txids are unique (height makes them unique)
+* UTXO set never has duplicate txids
+* Transaction lookup is always unambiguous
+
+==Backwards Compatibility==
+
+This rule applies from genesis. All INTcoin blocks must comply.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/consensus/tx_verify.cpp src/consensus/tx_verify.cpp]
+* [https://github.com/INT-devs/intcoin/blob/main/src/validation.cpp src/validation.cpp]
+
+==Test Vectors==
+
+{| class="wikitable"
+|-
+! Height !! scriptSig Prefix (hex) !! Valid
+|-
+| 0 || 00 || Yes
+|-
+| 1 || 01 01 || Yes
+|-
+| 127 || 01 7f || Yes
+|-
+| 128 || 02 80 00 || Yes
+|-
+| 500000 || 03 20 a1 07 || Yes
+|-
+| 500000 || 04 20 a1 07 00 || No (not minimal)
+|}
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki BIP 34: Block v2, Height in Coinbase]
+* [[iip-0004.mediawiki|IIP-4: Duplicate Transaction Prevention]]
+
+==Copyright==
+
+This document is placed in the public domain.

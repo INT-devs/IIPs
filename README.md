@@ -12,6 +12,12 @@ Having an IIP here does not make it a formally accepted standard until its statu
 |--------|-------|-------|-------|------|--------|
 | [1](iip-0001.mediawiki) | | IIP Purpose and Guidelines | INT Core | Process | Active |
 | [2](iip-0002.mediawiki) | Consensus | Post-Quantum Signature Scheme (ML-DSA-87) | INT Core | Standard | Final |
+| [3](iip-0003.mediawiki) | Consensus | Version Bits with Timeout and Delay | INT Core | Standard | Final |
+| [4](iip-0004.mediawiki) | Consensus | Duplicate Transaction Prevention | INT Core | Standard | Final |
+| [5](iip-0005.mediawiki) | Consensus | Block Height in Coinbase | INT Core | Standard | Final |
+| [6](iip-0006.mediawiki) | Consensus | OP_CHECKLOCKTIMEVERIFY | INT Core | Standard | Final |
+| [7](iip-0007.mediawiki) | Consensus | Relative Lock-Time Using Sequence Numbers | INT Core | Standard | Final |
+| [8](iip-0008.mediawiki) | Consensus | OP_CHECKSEQUENCEVERIFY | INT Core | Standard | Final |
 | [44](iip-0044.mediawiki) | Applications | HD Wallet Derivation (SHA3-based) | INT Core | Standard | Final |
 | [47](iip-0047.mediawiki) | Consensus | Extended OP_RETURN for Payment Codes | INT Core | Standard | Draft |
 

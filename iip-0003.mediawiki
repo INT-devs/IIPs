@@ -1,0 +1,139 @@
+<pre>
+  IIP: 3
+  Title: Version Bits with Timeout and Delay
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires:
+  Replaces:
+</pre>
+
+==Abstract==
+
+This IIP describes a mechanism for deploying soft forks using version bits in block headers to signal miner readiness. It is adapted from BIP 9 for INTcoin.
+
+==Motivation==
+
+Soft fork deployments require coordination across the network. Version bits provide a parallel signaling mechanism allowing multiple soft forks to be deployed simultaneously, with clear activation thresholds and timeout conditions.
+
+==Specification==
+
+===Parameters===
+
+Each soft fork deployment is specified by the following parameters:
+
+* '''name''': A short identifier for the deployment
+* '''bit''': The bit position in nVersion (0-28)
+* '''starttime''': The minimum median time past (MTP) for activation to begin
+* '''timeout''': The time after which the deployment is considered failed
+* '''threshold''': The number of blocks required for activation (default: 90%)
+* '''min_activation_height''': Minimum block height for activation
+
+===States===
+
+A deployment progresses through the following states:
+
+# '''DEFINED''': The deployment is defined but not yet started
+# '''STARTED''': Signaling has begun (MTP >= starttime)
+# '''LOCKED_IN''': Threshold reached, waiting for activation
+# '''ACTIVE''': Deployment is active
+# '''FAILED''': Timeout reached without activation
+
+===State Transitions===
+
+<pre>
+   DEFINED
+      |
+      | (MTP >= starttime)
+      v
+   STARTED -----> FAILED (MTP >= timeout)
+      |
+      | (threshold reached)
+      v
+   LOCKED_IN
+      |
+      | (next retarget period && height >= min_activation_height)
+      v
+    ACTIVE
+</pre>
+
+===Signaling===
+
+Miners signal readiness by setting the appropriate bit in the block's nVersion field:
+
+<pre>
+nVersion = 0x20000000 | (1 << bit)
+</pre>
+
+The top 3 bits are reserved (001), leaving bits 0-28 for signaling.
+
+===Threshold Calculation===
+
+Within each retarget period (2016 blocks on mainnet):
+
+<pre>
+signal_count = count of blocks with bit set
+if signal_count >= threshold:
+    state = LOCKED_IN
+</pre>
+
+===INTcoin Parameters===
+
+{| class="wikitable"
+|-
+! Network !! Period !! Threshold
+|-
+| Mainnet || 2016 blocks || 1815 (90%)
+|-
+| Testnet || 2016 blocks || 1512 (75%)
+|-
+| Signet || 2016 blocks || 1815 (90%)
+|-
+| Regtest || 144 blocks || 108 (75%)
+|}
+
+===Current Deployments===
+
+{| class="wikitable"
+|-
+! Name !! Bit !! Start Time !! Status
+|-
+| testdummy || 0 || (varies by network) || Testing
+|-
+| extended_opreturn || 4 || Genesis || Draft (IIP-47)
+|}
+
+==Rationale==
+
+Version bits provide several advantages over previous deployment methods:
+
+# '''Parallel Deployments''': Up to 29 soft forks can be signaled simultaneously
+# '''Clear Thresholds''': Miners explicitly signal readiness
+# '''Timeout Safety''': Failed deployments automatically expire
+# '''Miner Coordination''': Reduces risk of chain splits
+
+The 90% threshold ensures strong consensus before activation.
+
+==Backwards Compatibility==
+
+Version bits are backwards compatible. Nodes that do not understand a deployment will:
+* Accept blocks regardless of version bits
+* Continue normal operation after activation
+
+Old nodes may not enforce new rules after activation, potentially following an invalid chain.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/consensus/versionbits.cpp src/consensus/versionbits.cpp]
+* [https://github.com/INT-devs/intcoin/blob/main/src/consensus/versionbits.h src/consensus/versionbits.h]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki BIP 9: Version bits with timeout and delay]
+
+==Copyright==
+
+This document is placed in the public domain.
