@@ -1,0 +1,120 @@
+<pre>
+  IIP: 45
+  Title: Extended OP_RETURN for Post-Quantum Protocols
+  Author: INT Core <team@international-coin.org>
+  Status: Draft
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 37
+</pre>
+
+==Abstract==
+
+This IIP proposes increasing the maximum OP_RETURN output size from 83 bytes to 4,096 bytes to accommodate post-quantum cryptographic protocols.
+
+==Motivation==
+
+Post-quantum cryptographic primitives have larger data sizes:
+
+{| class="wikitable"
+|-
+! Algorithm !! Data Size
+|-
+| Kyber1024 public key || 1,568 bytes
+|-
+| Kyber1024 ciphertext || 1,568 bytes
+|-
+| Dilithium5 signature || 4,627 bytes
+|-
+| Dilithium5 public key || 2,592 bytes
+|}
+
+Protocols requiring OP_RETURN:
+* IIP-47 Payment Codes (notification transactions)
+* Future stealth addresses
+* Timestamping services
+* Cross-chain atomic swaps
+
+==Specification==
+
+===New Limit===
+
+{| class="wikitable"
+|-
+! Parameter !! Old Value !! New Value
+|-
+| MAX_OP_RETURN_SIZE || 83 bytes || 4,096 bytes
+|}
+
+===Activation===
+
+Via version bits mechanism (IIP-37):
+
+{| class="wikitable"
+|-
+! Parameter !! Value
+|-
+| Deployment Name || extended_opreturn
+|-
+| Bit || 4
+|-
+| Start Time || Genesis
+|-
+| Timeout || None (NO_TIMEOUT)
+|-
+| Min Activation Height || 1,000 blocks
+|-
+| Threshold || 90%
+|}
+
+===Consensus Rules===
+
+When DEPLOYMENT_EXTENDED_OPRETURN is '''ACTIVE''':
+* OP_RETURN outputs up to 4,096 bytes valid
+* Only one OP_RETURN output per transaction
+* OP_RETURN outputs must have zero value
+
+===Policy Changes===
+
+<pre>
+size_t maxOpReturn = IsDeploymentActive(DEPLOYMENT_EXTENDED_OPRETURN)
+    ? MAX_OP_RETURN_SIZE_EXTENDED  // 4096
+    : MAX_OP_RETURN_SIZE;          // 83
+</pre>
+
+==Rationale==
+
+===Why 4 KB?===
+
+* Sufficient for IIP-47 (~1.6 KB)
+* Room for metadata and future extensions
+* Not excessive (prevents abuse)
+* Clean power-of-2 boundary
+
+===Why Soft Fork?===
+
+* Old nodes reject large OP_RETURN as non-standard
+* Old nodes still validate blocks containing them
+* No consensus-critical changes
+
+==Security Considerations==
+
+* 4 KB limit prevents large data dumps
+* Fee economics discourage spam
+* Block limits apply
+* Single OP_RETURN per transaction maintained
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/node/netprocessing.h src/node/netprocessing.h]
+
+==References==
+
+* [[iip-0037.mediawiki|IIP-37: Version Bits with Height-Based Activation]]
+* [[iip-0047.mediawiki|IIP-47: Extended OP_RETURN for Payment Codes]]
+
+==Copyright==
+
+This document is placed in the public domain.

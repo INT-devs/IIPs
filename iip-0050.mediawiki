@@ -1,0 +1,102 @@
+<pre>
+  IIP: 50
+  Title: Lightning Invoices and Payments
+  Author: INT Core <team@international-coin.org>
+  Status: Draft
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 46
+</pre>
+
+==Abstract==
+
+This IIP specifies invoice encoding for Lightning payments, adapted from BOLT #11.
+
+==Specification==
+
+===Invoice Format===
+
+Invoices are Bech32-encoded with human-readable prefix:
+
+{| class="wikitable"
+|-
+! Network !! Prefix
+|-
+| Mainnet || int
+|-
+| Testnet || tint
+|}
+
+Example: int1qp...xyz
+
+===Invoice Fields===
+
+{| class="wikitable"
+|-
+! Tag !! Description
+|-
+| p || Payment hash (52 chars)
+|-
+| d || Description
+|-
+| n || Payee node ID
+|-
+| h || Description hash (for long descriptions)
+|-
+| x || Expiry time in seconds
+|-
+| c || CLTV expiry delta
+|-
+| f || Fallback on-chain address
+|-
+| r || Routing hints
+|}
+
+===Amount Encoding===
+
+Amounts use multiplier suffixes:
+
+{| class="wikitable"
+|-
+! Suffix !! Multiplier
+|-
+| m || milli-INT (1/1,000)
+|-
+| u || micro-INT (1/1,000,000)
+|-
+| n || nano-INT (1/1,000,000,000)
+|-
+| p || pico-INT (1/1,000,000,000,000)
+|}
+
+Example: int100m... = 100 milli-INT = 0.1 INT
+
+===Signature===
+
+Invoices are signed with the payee's node key (ML-DSA-87):
+<pre>
+signature = Sign(recovery_flag || SHA3_256(hrp || data))
+</pre>
+
+Signature is appended to the invoice data.
+
+===Routing Hints===
+
+For private channels, include routing hints:
+<pre>
+pubkey || short_channel_id || fee_base_mint || fee_proportional || cltv_delta
+</pre>
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/lightning/invoice.h src/lightning/invoice.h]
+
+==References==
+
+* [https://github.com/lightning/bolts/blob/master/11-payment-encoding.md BOLT #11: Invoice Protocol]
+
+==Copyright==
+
+This document is placed in the public domain.

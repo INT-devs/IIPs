@@ -1,0 +1,110 @@
+<pre>
+  IIP: 48
+  Title: Lightning Channels
+  Author: INT Core <team@international-coin.org>
+  Status: Draft
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 46
+</pre>
+
+==Abstract==
+
+This IIP specifies the channel management protocol for INTcoin Lightning, adapted from BOLT #2 for ML-DSA-87 signatures.
+
+==Specification==
+
+===Channel States===
+
+<pre>
+NONE → INIT_SENT → ACCEPT_RECEIVED → FUNDING_CREATED → FUNDING_SIGNED
+    → AWAITING_FUNDING_DEPTH → NORMAL → SHUTDOWN_SENT → CLOSING_NEGOTIATION
+    → CLOSED
+</pre>
+
+===Opening Protocol===
+
+# Funder sends '''open_channel'''
+# Acceptor responds with '''accept_channel'''
+# Funder broadcasts funding tx, sends '''funding_created'''
+# Acceptor responds with '''funding_signed'''
+# Both send '''channel_ready''' after confirmations
+
+===open_channel Fields===
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| chain_hash || Genesis block hash
+|-
+| funding_mint || Channel capacity
+|-
+| push_mint || Initial amount to peer
+|-
+| dust_limit_mint || Minimum output value
+|-
+| channel_reserve_mint || Required reserve
+|-
+| to_self_delay || CSV delay for outputs
+|-
+| funding_pubkey || Funding public key (2592 bytes)
+|-
+| revocation_basepoint || Revocation key base
+|-
+| payment_basepoint || Payment key base
+|-
+| htlc_basepoint || HTLC key base
+|-
+| first_per_commitment_point || First commitment point
+|}
+
+===Commitment Transaction===
+
+# '''Funding Input''': 2-of-2 multisig
+# '''To-Local Output''': Our balance with CSV delay
+# '''To-Remote Output''': Their balance (immediate)
+# '''HTLC Outputs''': One per pending HTLC
+
+To-Local Script:
+<pre>
+OP_IF
+    <revocation_pubkey>
+OP_ELSE
+    <to_self_delay> OP_CHECKSEQUENCEVERIFY OP_DROP
+    <local_delayedpubkey>
+OP_ENDIF
+OP_CHECKSIG_DILITHIUM
+</pre>
+
+===Closing===
+
+====Cooperative Close====
+
+# Either party sends '''shutdown''' with closing script
+# Parties negotiate via '''closing_signed'''
+# Final closing tx broadcast
+
+====Force Close====
+
+Broadcast latest commitment transaction. Broadcaster's outputs time-locked.
+
+===Breach Remedy===
+
+If counterparty broadcasts revoked commitment:
+# Non-broadcaster holds revocation secret
+# Can claim ALL channel funds via penalty tx
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/lightning/channel.h src/lightning/channel.h]
+
+==References==
+
+* [https://github.com/lightning/bolts/blob/master/02-peer-protocol.md BOLT #2: Peer Protocol]
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,118 @@
+<pre>
+  IIP: 38
+  Title: Pay to Script Hash
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes Pay to Script Hash (P2SH) for INTcoin, adapted from BIP 16 for ML-DSA-87 signatures.
+
+==Motivation==
+
+P2SH provides:
+* Compact outputs (complex scripts represented by 20-byte hash)
+* Sender simplicity (only need script hash, not full script)
+* Fee efficiency (full script revealed only when spending)
+* Privacy (spending conditions hidden until spent)
+
+==Specification==
+
+===Script Format===
+
+A P2SH output has the scriptPubKey:
+<pre>
+OP_HASH160 <20-byte-script-hash> OP_EQUAL
+</pre>
+
+The script hash is computed as:
+<pre>
+Hash160(redeemScript) = SHA3-256(redeemScript)[0:20]
+</pre>
+
+'''Note:''' INTcoin uses SHA3-256 truncated to 20 bytes, not RIPEMD160(SHA256).
+
+===Spending===
+
+To spend a P2SH output, the scriptSig must contain:
+<pre>
+<data1> <data2> ... <dataN> <serialized-redeem-script>
+</pre>
+
+===Address Encoding===
+
+{| class="wikitable"
+|-
+! Network !! Prefix
+|-
+| Mainnet || int1s
+|-
+| Testnet || tint1s
+|-
+| Signet || sint1s
+|-
+| Regtest || rint1s
+|}
+
+===Script Limits===
+
+{| class="wikitable"
+|-
+! Limit !! Value
+|-
+| MAX_SCRIPT_SIZE || 10,000 bytes
+|-
+| MAX_SCRIPT_ELEMENT_SIZE || 5,000 bytes
+|-
+| MAX_OPS_PER_SCRIPT || 201
+|}
+
+===Standard Redeem Script Patterns===
+
+====P2SH-P2PK====
+<pre>
+Redeem: <pubkey> OP_CHECKSIG_DILITHIUM
+ScriptSig: <signature> <redeem-script>
+</pre>
+
+====P2SH Time-Locked====
+<pre>
+Redeem: <locktime> OP_CHECKLOCKTIMEVERIFY OP_DROP <pubkey> OP_CHECKSIG_DILITHIUM
+ScriptSig: <signature> <redeem-script>
+</pre>
+
+===INTcoin Adaptations===
+
+{| class="wikitable"
+|-
+! Component !! BIP 16 !! IIP-38
+|-
+| Hash function || RIPEMD160(SHA256) || SHA3-256[0:20]
+|-
+| Signature algorithm || ECDSA || ML-DSA-87
+|-
+| Signature opcode || OP_CHECKSIG || OP_CHECKSIG_DILITHIUM
+|-
+| Signature size || ~72 bytes || 4,627 bytes
+|-
+| Public key size || 33 bytes || 2,592 bytes
+|-
+| Address encoding || Base58Check || Bech32
+|}
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/script/interpreter.cpp src/script/interpreter.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki BIP 16: Pay to Script Hash]
+
+==Copyright==
+
+This document is placed in the public domain.

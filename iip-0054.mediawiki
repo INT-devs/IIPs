@@ -1,0 +1,101 @@
+<pre>
+  IIP: 54
+  Title: Lightning DNS Node Discovery
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 46
+</pre>
+
+==Abstract==
+
+This IIP specifies DNS-based node discovery for Lightning, adapted from BOLT #10.
+
+==Specification==
+
+===DNS Seed Format===
+
+<pre>
+<network>.<seed-domain>
+</pre>
+
+Networks: ln (mainnet), lnt (testnet)
+
+===Record Types===
+
+====SRV Records====
+
+<pre>
+_lightning._tcp.ln.seed.example.com. IN SRV 10 10 2216 node1.example.com.
+</pre>
+
+====TXT Records====
+
+<pre>
+ln.seed.example.com. IN TXT "ln1qp...xyz@192.168.1.1:2216"
+</pre>
+
+===Node ID Encoding===
+
+{| class="wikitable"
+|-
+! Network !! HRP
+|-
+| Mainnet || ln
+|-
+| Testnet || lnt
+|-
+| Signet || lns
+|-
+| Regtest || lnrt
+|}
+
+===Address Formats===
+
+{| class="wikitable"
+|-
+! Type !! Format
+|-
+| IPv4 || a.b.c.d:port
+|-
+| IPv6 || [addr]:port
+|-
+| Tor v3 || addr.onion:port
+|-
+| I2P || addr.b32.i2p:port
+|}
+
+===DNS Seeds===
+
+Mainnet:
+* ln.seed1.international-coin.org
+* ln.seed2.international-coin.org
+
+Testnet:
+* lnt.seed1.international-coin.org
+* lnt.seed2.international-coin.org
+
+===TXT Record Chunking===
+
+For large node IDs (2592 bytes), split across multiple TXT strings.
+
+==Security Considerations==
+
+* Seeds SHOULD support DNSSEC
+* Cross-reference multiple seeds
+* Verify node reachability
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/lightning/dnsbootstrap.h src/lightning/dnsbootstrap.h]
+
+==References==
+
+* [https://github.com/lightning/bolts/blob/master/10-dns-bootstrap.md BOLT #10: DNS Bootstrap]
+
+==Copyright==
+
+This document is placed in the public domain.

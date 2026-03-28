@@ -1,0 +1,94 @@
+<pre>
+  IIP: 55
+  Title: Lightning Watchtowers
+  Author: INT Core <team@international-coin.org>
+  Status: Draft
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 46
+</pre>
+
+==Abstract==
+
+This IIP specifies watchtower protocol for Lightning channel breach detection and response.
+
+==Motivation==
+
+Lightning requires monitoring for counterparty cheating. Watchtowers provide:
+* 24/7 monitoring when node is offline
+* Automated breach response
+* Penalty transaction broadcast
+
+==Specification==
+
+===Watchtower Registration===
+
+Client sends registration request:
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| client_pubkey || Client's public key (2592 bytes)
+|-
+| reward_address || Address for watchtower payment
+|-
+| max_updates || Maximum state updates
+|}
+
+===State Updates===
+
+For each commitment, client sends encrypted blob:
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| locator || SHA3-256(txid)[0:16] (16 bytes)
+|-
+| encrypted_blob || ChaCha20 encrypted penalty tx
+|}
+
+The locator is derived from the commitment txid. When watchtower sees a matching transaction, it decrypts and broadcasts the penalty.
+
+===Blob Encryption===
+
+<pre>
+key = SHA3-256(breach_txid)
+encrypted = ChaCha20(key, penalty_tx || reward_output)
+</pre>
+
+===Breach Response===
+
+When watchtower detects breach (matching locator):
+# Decrypt penalty transaction
+# Add reward output to penalty tx
+# Broadcast penalty transaction
+# Claim breach funds
+
+===Watchtower Fees===
+
+Fee models:
+* Per-update fee: Small payment per state update
+* Breach reward: Percentage of recovered funds
+* Subscription: Flat periodic fee
+
+==Security Considerations==
+
+* Watchtower cannot steal funds (only penalty tx data)
+* Multiple watchtowers recommended
+* Encrypted blobs protect channel privacy
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/lightning/watchtower.h src/lightning/watchtower.h]
+
+==References==
+
+* [https://github.com/lightning/bolts BOLT Specifications]
+
+==Copyright==
+
+This document is placed in the public domain.

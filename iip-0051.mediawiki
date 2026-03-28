@@ -1,0 +1,117 @@
+<pre>
+  IIP: 51
+  Title: Lightning Routing
+  Author: INT Core <team@international-coin.org>
+  Status: Draft
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 46
+</pre>
+
+==Abstract==
+
+This IIP specifies routing and pathfinding for Lightning payments, adapted from BOLT #7.
+
+==Specification==
+
+===Network Gossip===
+
+Nodes exchange routing information via gossip messages.
+
+====node_announcement====
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| signature || Node signature (4627 bytes)
+|-
+| features || Feature flags
+|-
+| timestamp || Unix timestamp
+|-
+| node_id || Node public key (2592 bytes)
+|-
+| rgb_color || Node color (RGB)
+|-
+| alias || Node name (32 bytes)
+|-
+| addresses || Network addresses
+|}
+
+====channel_announcement====
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| node_signature_1 || First node signature
+|-
+| node_signature_2 || Second node signature
+|-
+| features || Channel features
+|-
+| chain_hash || Genesis block hash
+|-
+| short_channel_id || Channel identifier
+|-
+| node_id_1 || First node public key
+|-
+| node_id_2 || Second node public key
+|}
+
+====channel_update====
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| signature || Node signature
+|-
+| chain_hash || Genesis block hash
+|-
+| short_channel_id || Channel identifier
+|-
+| timestamp || Update timestamp
+|-
+| message_flags || Message type flags
+|-
+| channel_flags || Channel direction/disabled
+|-
+| cltv_expiry_delta || CLTV delta
+|-
+| htlc_minimum_mint || Minimum HTLC
+|-
+| fee_base_mint || Base fee
+|-
+| fee_proportional_millionths || Proportional fee
+|}
+
+===Pathfinding===
+
+Route selection considers:
+* Total fees
+* CLTV delta accumulation
+* Channel capacity
+* Reliability scores
+
+===Short Channel ID===
+
+<pre>
+block_height (24 bits) || tx_index (24 bits) || output_index (16 bits)
+Format: "500000x42x0"
+</pre>
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/lightning/router.h src/lightning/router.h]
+
+==References==
+
+* [https://github.com/lightning/bolts/blob/master/07-routing-gossip.md BOLT #7: Routing Gossip]
+
+==Copyright==
+
+This document is placed in the public domain.

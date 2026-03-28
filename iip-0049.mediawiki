@@ -1,0 +1,119 @@
+<pre>
+  IIP: 49
+  Title: Lightning HTLC Operations
+  Author: INT Core <team@international-coin.org>
+  Status: Draft
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 46, 42
+</pre>
+
+==Abstract==
+
+This IIP specifies HTLC (Hash Time-Locked Contract) operations within Lightning channels, adapted from BOLT #2 for ML-DSA-87 signatures.
+
+==Specification==
+
+===Adding HTLCs===
+
+To add an HTLC, send '''update_add_htlc''':
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| channel_id || Channel identifier
+|-
+| id || HTLC ID (incrementing per channel)
+|-
+| amount_mint || Payment amount
+|-
+| payment_hash || SHA3-256 hash of preimage
+|-
+| cltv_expiry || Absolute timeout block height
+|-
+| onion_routing_packet || Encrypted routing data
+|}
+
+===Fulfilling HTLCs===
+
+To fulfill an HTLC, send '''update_fulfill_htlc''':
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| channel_id || Channel identifier
+|-
+| id || HTLC ID being fulfilled
+|-
+| payment_preimage || 32-byte preimage
+|}
+
+===Failing HTLCs===
+
+To fail an HTLC, send '''update_fail_htlc''':
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| channel_id || Channel identifier
+|-
+| id || HTLC ID being failed
+|-
+| reason || Encrypted failure reason
+|}
+
+===Commitment Signing===
+
+After HTLC updates, exchange '''commitment_signed''':
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| channel_id || Channel identifier
+|-
+| signature || Commitment tx signature (4627 bytes)
+|-
+| htlc_signatures || Signatures for HTLC outputs
+|}
+
+===Revocation===
+
+After receiving commitment signature, send '''revoke_and_ack''':
+
+{| class="wikitable"
+|-
+! Field !! Description
+|-
+| channel_id || Channel identifier
+|-
+| per_commitment_secret || Secret for previous commitment
+|-
+| next_per_commitment_point || Point for next commitment
+|}
+
+===HTLC States===
+
+<pre>
+LOCAL_PROPOSED → LOCAL_COMMITTED → LOCAL_IRREVOCABLY_COMMITTED
+REMOTE_PROPOSED → REMOTE_COMMITTED → REMOTE_IRREVOCABLY_COMMITTED
+                → FULFILLED | FAILED | REMOVED
+</pre>
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/lightning/htlc.h src/lightning/htlc.h]
+
+==References==
+
+* [https://github.com/lightning/bolts/blob/master/02-peer-protocol.md BOLT #2: Peer Protocol]
+* [[iip-0042.mediawiki|IIP-42: Hashed Time-Locked Contracts]]
+
+==Copyright==
+
+This document is placed in the public domain.

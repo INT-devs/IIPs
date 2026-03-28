@@ -1,0 +1,98 @@
+<pre>
+  IIP: 40
+  Title: Disallow 64-Byte Transactions
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP defines a consensus rule rejecting transactions with serialized size of 64 bytes or less, preventing attacks where crafted transactions could be confused with merkle tree inner nodes.
+
+==Motivation==
+
+INTcoin's merkle tree uses SHA3-256, producing 32-byte hashes. Each merkle inner node is the hash of two child nodes concatenated (64 bytes total). A 64-byte transaction could create ambiguity between transaction hashes and merkle node hashes.
+
+Attack vectors prevented:
+* Transaction-Merkle Confusion
+* SPV Proof Manipulation
+* CVE-2017-12842 class attacks
+
+==Specification==
+
+===Consensus Rule===
+
+Transactions MUST have a serialized size of at least 65 bytes.
+
+<pre>
+MIN_TX_SIZE = 65
+</pre>
+
+===Validation===
+
+<pre>
+// In CheckTransaction
+if (GetSerializeSize(tx) < MIN_TX_SIZE) {
+    return state.Invalid("bad-txns-undersize");
+}
+</pre>
+
+===Minimum Transaction Components===
+
+{| class="wikitable"
+|-
+! Component !! Size (bytes)
+|-
+| nVersion || 4
+|-
+| vin count || 1
+|-
+| prevout txid || 32
+|-
+| prevout index || 4
+|-
+| scriptSig length || 1
+|-
+| nSequence || 4
+|-
+| vout count || 1
+|-
+| nValue || 8
+|-
+| scriptPubKey length || 1
+|-
+| nLockTime || 4
+|-
+| '''Minimum Total''' || '''60'''
+|}
+
+A minimal valid transaction with empty scripts is approximately 60 bytes. Adding any meaningful script data exceeds the 65-byte minimum.
+
+===Why 65 Bytes?===
+
+* Merkle inner nodes are exactly 64 bytes
+* Any transaction >= 65 bytes cannot be confused with a merkle node
+* The minimal useful transaction is approximately 60 bytes anyway
+
+==Backwards Compatibility==
+
+This is a consensus rule tightening. No previously valid transaction should be affected because:
+# The minimum useful transaction with any script data exceeds 64 bytes
+# No known transaction type can be smaller than 65 bytes while remaining valid
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/consensus/dos_protection.h src/consensus/dos_protection.h]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0053.md BIP 53: Disallow 64-Byte Transactions]
+* [https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-12842 CVE-2017-12842]
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,99 @@
+<pre>
+  IIP: 53
+  Title: Onion Routing for Lightning
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 46
+</pre>
+
+==Abstract==
+
+This IIP specifies onion routing for Lightning payments, adapted from BOLT #4 to use ML-KEM-1024 (Kyber1024).
+
+==Motivation==
+
+Onion routing provides:
+* Sender privacy
+* Recipient privacy
+* Path privacy
+* Atomic payments
+
+==Specification==
+
+===Onion Packet Structure===
+
+<pre>
++----------------+------------------+---------------------+
+| Version (1)    | Ephemeral PK     | Encrypted Payload   |
+| 0x00           | (1568 bytes)     | (2000 bytes)        |
++----------------+------------------+---------------------+
+| HMAC (32 bytes)                                        |
++--------------------------------------------------------+
+Total: 4096 bytes
+</pre>
+
+===Key Encapsulation===
+
+Uses Kyber1024 KEM instead of ECDH:
+
+<pre>
+// Sender
+KyberEncapsulate(hop_pubkey, shared_secret, ciphertext)
+
+// Recipient
+KyberDecapsulate(hop_privkey, ciphertext, shared_secret)
+</pre>
+
+===Per-Hop Payload===
+
+{| class="wikitable"
+|-
+! Type !! Length !! Description
+|-
+| 2 || 8 || amt_to_forward
+|-
+| 4 || 4 || outgoing_cltv_value
+|-
+| 6 || 8 || short_channel_id
+|-
+| 8 || var || payment_data (final hop)
+|}
+
+===Encryption===
+
+<pre>
+rho = SHAKE256(shared_secret || "rho")
+mu = SHAKE256(shared_secret || "mu")
+
+ChaCha20Poly1305Encrypt(rho, nonce, payload)
+hmac = HMAC_SHA3_256(mu, encrypted_payload)
+</pre>
+
+===INTcoin vs Bitcoin===
+
+{| class="wikitable"
+|-
+! Property !! BOLT #4 !! IIP-53
+|-
+| Key size || 33 bytes || 1568 bytes
+|-
+| Packet size || 1366 bytes || 4096 bytes
+|-
+| Security || Pre-quantum || Post-quantum
+|}
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/lightning/onion.h src/lightning/onion.h]
+
+==References==
+
+* [https://github.com/lightning/bolts/blob/master/04-onion-routing.md BOLT #4: Onion Routing]
+
+==Copyright==
+
+This document is placed in the public domain.

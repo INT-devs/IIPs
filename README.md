@@ -46,8 +46,25 @@ Having an IIP here does not make it a formally accepted standard until its statu
 | [34](iip-0034.mediawiki) | Applications | DNS Payment Instructions | INT Core | Standard | Final |
 | [35](iip-0035.mediawiki) | Applications | Output Script Descriptors | INT Core | Standard | Final |
 | [36](iip-0036.mediawiki) | Mining | getblocktemplate | INT Core | Standard | Final |
+| [37](iip-0037.mediawiki) | Consensus | Version Bits with Height-Based Activation | INT Core | Standard | Final |
+| [38](iip-0038.mediawiki) | Consensus | Pay to Script Hash | INT Core | Standard | Final |
+| [39](iip-0039.mediawiki) | Consensus | Finite Monetary Supply | INT Core | Standard | Final |
+| [40](iip-0040.mediawiki) | Consensus | Disallow 64-Byte Transactions | INT Core | Standard | Final |
+| [41](iip-0041.mediawiki) | Consensus | Median Time-Past for Lock-Time | INT Core | Standard | Final |
+| [42](iip-0042.mediawiki) | Consensus | Hashed Time-Locked Contracts | INT Core | Standard | Final |
+| [43](iip-0043.mediawiki) | Applications | Non-Segwit Output Script Descriptors | INT Core | Standard | Final |
 | [44](iip-0044.mediawiki) | Applications | HD Wallet Derivation (SHA3-based) | INT Core | Standard | Final |
+| [45](iip-0045.mediawiki) | Consensus | Extended OP_RETURN for Post-Quantum Protocols | INT Core | Standard | Draft |
+| [46](iip-0046.mediawiki) | Applications | Lightning Network for INTcoin | INT Core | Standard | Draft |
 | [47](iip-0047.mediawiki) | Consensus | Extended OP_RETURN for Payment Codes | INT Core | Standard | Draft |
+| [48](iip-0048.mediawiki) | Applications | Lightning Channels | INT Core | Standard | Draft |
+| [49](iip-0049.mediawiki) | Applications | Lightning HTLC Operations | INT Core | Standard | Draft |
+| [50](iip-0050.mediawiki) | Applications | Lightning Invoices and Payments | INT Core | Standard | Draft |
+| [51](iip-0051.mediawiki) | Applications | Lightning Routing | INT Core | Standard | Draft |
+| [52](iip-0052.mediawiki) | Applications | Lightning Key Derivation | INT Core | Standard | Final |
+| [53](iip-0053.mediawiki) | Applications | Onion Routing for Lightning | INT Core | Standard | Final |
+| [54](iip-0054.mediawiki) | Applications | Lightning DNS Node Discovery | INT Core | Standard | Final |
+| [55](iip-0055.mediawiki) | Applications | Lightning Watchtowers | INT Core | Standard | Draft |
 
 ## IIP Status Terms
 

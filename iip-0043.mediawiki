@@ -1,0 +1,123 @@
+<pre>
+  IIP: 43
+  Title: Non-Segwit Output Script Descriptors
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 35
+</pre>
+
+==Abstract==
+
+This IIP specifies pk(), pkh(), sh(), multi(), sortedmulti(), combo(), raw(), and addr() output script descriptors for INTcoin, using ML-DSA-87 keys with OP_CHECKSIG_DILITHIUM.
+
+==Motivation==
+
+These descriptors allow wallets to represent standard INTcoin output scripts in a portable format, enabling:
+* Hardware wallet coordination
+* Watch-only wallet import
+* Account-level backup and restore
+* PST (Partially Signed Transaction) workflows
+
+==Specification==
+
+===pk(KEY)===
+
+Pay to public key script.
+
+<pre>
+Script: <pubkey> OP_CHECKSIG_DILITHIUM
+</pre>
+
+===pkh(KEY)===
+
+Pay to public key hash script.
+
+<pre>
+Script: OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG_DILITHIUM
+</pre>
+
+Addresses start with int1q... (Bech32).
+
+===sh(SCRIPT)===
+
+Pay to script hash.
+
+<pre>
+Script: OP_HASH160 <20-byte-hash> OP_EQUAL
+</pre>
+
+===multi(k,KEY1,...,KEYn)===
+
+k-of-n multisig script.
+
+'''WARNING:''' INTcoin does NOT support OP_CHECKMULTISIG for spending. Use PST for multi-party signing.
+
+===sortedmulti(k,KEY1,...,KEYn)===
+
+k-of-n multisig with lexicographically sorted keys.
+
+Same spending restrictions as multi() apply.
+
+===combo(KEY)===
+
+All script types for a single key (P2PK and P2PKH).
+
+===raw(HEX)===
+
+Raw hex-encoded script.
+
+===addr(ADDR)===
+
+Script corresponding to an address.
+
+===HD Path Convention===
+
+<pre>
+m / purpose' / coin_type' / account' / change / index
+m / 44'      / 2210'      / 0'       / 0      / 0
+</pre>
+
+Example descriptor with origin:
+<pre>
+pkh([01234567/44'/2210'/0']ixpub1.../0/*)#checksum
+</pre>
+
+===Key Derivation===
+
+INTcoin uses SHA3-256 (SHAKE256) for HD derivation. '''Important:''' Child public key derivation is NOT supported with Dilithium5. Hardened derivation is always required.
+
+===INTcoin Adaptations===
+
+{| class="wikitable"
+|-
+! Aspect !! BIP 381 !! IIP-43
+|-
+| Key type || ECDSA secp256k1 || ML-DSA-87
+|-
+| Pubkey size || 33 bytes || 2,592 bytes
+|-
+| Extended keys || xpub/xprv || ixpub/ixprv
+|-
+| Checksig opcode || OP_CHECKSIG || OP_CHECKSIG_DILITHIUM
+|-
+| Multisig || Fully supported || Scripts only (not spendable)
+|-
+| HD derivation || BIP32 HMAC-SHA512 || SHA3-256 based
+|}
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/script/descriptor.cpp src/script/descriptor.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0381.mediawiki BIP 381: Non-Segwit Output Script Descriptors]
+* [[iip-0035.mediawiki|IIP-35: Output Script Descriptors]]
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,101 @@
+<pre>
+  IIP: 41
+  Title: Median Time-Past as Endpoint for Lock-Time Calculations
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 6, 7
+</pre>
+
+==Abstract==
+
+This IIP specifies using Median Time-Past (MTP) of the previous 11 blocks as the reference point for lock-time calculations, instead of block timestamp.
+
+==Motivation==
+
+Using MTP instead of block timestamp provides:
+* Miner manipulation resistance (single miners cannot advance time significantly)
+* Predictability (MTP increases monotonically)
+* Consensus stability (reduces timestamp-based attack vectors)
+
+==Specification==
+
+===Median Time-Past Calculation===
+
+<pre>
+int64_t GetMedianTimePast(const CBlockIndex* pindex) {
+    int64_t timestamps[11];
+    const CBlockIndex* p = pindex;
+
+    for (int i = 0; i < 11 && p; i++) {
+        timestamps[i] = p->GetBlockTime();
+        p = p->pprev;
+    }
+
+    std::sort(timestamps, timestamps + 11);
+    return timestamps[5];  // Median of 11 values
+}
+</pre>
+
+===Lock-Time Validation===
+
+For transactions with time-based nLockTime (>= 500,000,000):
+
+<pre>
+// IIP-41: Use MTP for locktime validation
+if (nLockTime >= 500000000 && nLockTime > GetMedianTimePast(pindexPrev))
+    return false;  // Not yet valid
+</pre>
+
+===Affected Operations===
+
+{| class="wikitable"
+|-
+! Operation !! Reference Time
+|-
+| nLockTime validation || MTP of previous block
+|-
+| OP_CHECKLOCKTIMEVERIFY (IIP-6) || MTP of previous block
+|-
+| Relative time-locks (IIP-7) || MTP at output confirmation
+|}
+
+===Why 11 Blocks?===
+
+* 6 confirmations of honest timestamps needed to manipulate
+* ~11 minutes of history at 1-minute blocks
+* Balance between stability and responsiveness
+
+===Monotonicity===
+
+MTP is guaranteed to never decrease, even if individual block timestamps vary. This ensures lock-times behave predictably.
+
+==Security Considerations==
+
+===Time-Warp Attack Mitigation===
+
+MTP limits the impact of timestamp manipulation:
+* A majority of miners would need to collude
+* Even then, time can only advance by ~1 hour over 6 blocks
+* Network would notice obvious manipulation
+
+===Future Timestamp Limit===
+
+Blocks are still subject to the 2-hour future timestamp limit, independent of MTP.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/consensus/validation.cpp src/consensus/validation.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0113.mediawiki BIP 113: Median time-past as endpoint for lock-time calculations]
+* [[iip-0006.mediawiki|IIP-6: OP_CHECKLOCKTIMEVERIFY]]
+* [[iip-0007.mediawiki|IIP-7: Relative Lock-Time Using Sequence Numbers]]
+
+==Copyright==
+
+This document is placed in the public domain.

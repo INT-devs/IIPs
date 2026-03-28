@@ -1,0 +1,75 @@
+<pre>
+  IIP: 52
+  Title: Lightning Key Derivation
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 46
+</pre>
+
+==Abstract==
+
+This IIP specifies per-commitment key derivation for Lightning channels, adapted from BOLT #3 for ML-DSA-87.
+
+==Specification==
+
+===Key Hierarchy===
+
+<pre>
+funding_key (permanent)
+    |
+    +-- per_commitment_point[n] (per-state)
+            |
+            +-- local_payment_key
+            +-- remote_payment_key
+            +-- local_htlc_key
+            +-- remote_htlc_key
+            +-- local_delayed_payment_key
+            +-- revocation_key
+</pre>
+
+===Per-Commitment Secrets===
+
+Generate 2^48 unique secrets from a single seed using shachain-like structure for O(log n) storage.
+
+===Key Derivation===
+
+All derivations use SHAKE256:
+
+<pre>
+// Payment key
+derived_key = KeyGen(SHAKE256(basepoint || per_commitment_point || "payment"))
+
+// Revocation key
+revocation_key = KeyGen(SHAKE256(revocation_basepoint ||
+                                  per_commitment_point ||
+                                  "revocation"))
+</pre>
+
+===Dilithium5 Adaptation===
+
+Unlike ECDSA algebraic tweaking, Dilithium5 requires:
+# Derive seed from base materials
+# Generate new keypair from seed
+# '''Both parties must store derived public keys'''
+
+==Security Considerations==
+
+* Per-commitment secrets MUST be stored encrypted
+* Base keys MUST be derived from HD wallet seed
+* Revealed secrets MUST be persisted for breach remedy
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/lightning/keys.h src/lightning/keys.h]
+
+==References==
+
+* [https://github.com/lightning/bolts/blob/master/03-transactions.md BOLT #3: Lightning Transactions]
+
+==Copyright==
+
+This document is placed in the public domain.

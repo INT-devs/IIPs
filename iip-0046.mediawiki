@@ -1,0 +1,112 @@
+<pre>
+  IIP: 46
+  Title: Lightning Network for INTcoin
+  Author: INT Core <team@international-coin.org>
+  Status: Draft
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP defines the Lightning Network implementation for INTcoin, a second-layer payment protocol enabling instant, high-volume transactions. Adapted from Bitcoin BOLTs for ML-DSA-87 post-quantum signatures.
+
+==Motivation==
+
+On-chain INTcoin transactions have inherent limitations:
+* Confirmation Time: 1-minute average blocks still require confirmations
+* Throughput: Block size limits constrain volume
+* Fees: On-chain fees prohibitive for micropayments
+* Privacy: All transactions publicly visible
+
+Lightning Network enables:
+* Instant Payments: Sub-second confirmation
+* High Throughput: Millions of transactions per second
+* Low Fees: Minimal routing fees (<0.1 INT typical)
+* Enhanced Privacy: Only channel opens/closes on-chain
+
+==Specification==
+
+===Terminology===
+
+{| class="wikitable"
+|-
+! Term !! Definition
+|-
+| INT || Base unit (1 INT = 10,000 base units)
+|-
+| Mint || Milli-INT for Lightning precision (1 INT = 10,000,000 mint)
+|-
+| Channel || Bidirectional payment channel
+|-
+| HTLC || Hash Time-Locked Contract
+|}
+
+===Post-Quantum Cryptography===
+
+* Public Key Size: 2,592 bytes (ML-DSA-87)
+* Signature Size: 4,627 bytes
+* Security Level: NIST Level 5
+
+===Channel Capacity Limits===
+
+{| class="wikitable"
+|-
+! Parameter !! Value
+|-
+| min_channel_size || 10 INT
+|-
+| max_channel_size || 1,000,000 INT
+|-
+| dust_limit || 0.0546 INT
+|-
+| channel_reserve || 1% of capacity
+|-
+| max_accepted_htlcs || 483
+|}
+
+===Fee Structure===
+
+<pre>
+fee = base_fee + (amount_mint * fee_rate_millionths / 1,000,000)
+</pre>
+
+Default: base_fee=1,000 mint (0.1 INT), fee_rate=1 (0.0001%)
+
+===HTLC Limits===
+
+{| class="wikitable"
+|-
+! Parameter !! Value
+|-
+| min_htlc_mint || 1,000 (0.1 INT)
+|-
+| min_final_cltv_expiry || 40 blocks (~40 min)
+|-
+| max_cltv_expiry || 2,016 blocks (~2 weeks)
+|}
+
+==Related IIPs==
+
+* [[iip-0048.mediawiki|IIP-48: Lightning Channels]]
+* [[iip-0049.mediawiki|IIP-49: Lightning HTLC Operations]]
+* [[iip-0050.mediawiki|IIP-50: Lightning Invoices]]
+* [[iip-0051.mediawiki|IIP-51: Lightning Routing]]
+* [[iip-0052.mediawiki|IIP-52: Lightning Key Derivation]]
+* [[iip-0053.mediawiki|IIP-53: Onion Routing]]
+* [[iip-0054.mediawiki|IIP-54: DNS Node Discovery]]
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/tree/main/src/lightning src/lightning/]
+
+==References==
+
+* [https://github.com/lightning/bolts BOLT Specifications]
+* [https://csrc.nist.gov/pubs/fips/204/final ML-DSA (FIPS 204)]
+
+==Copyright==
+
+This document is placed in the public domain.

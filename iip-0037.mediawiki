@@ -1,0 +1,138 @@
+<pre>
+  IIP: 37
+  Title: Version Bits with Height-Based Activation
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 3
+</pre>
+
+==Abstract==
+
+This IIP describes the version bits soft fork activation mechanism with support for height-based activation, combining elements from BIP 8 and BIP 9 for INTcoin.
+
+==Motivation==
+
+Soft fork activation requires coordination between miners, nodes, and users. This mechanism provides:
+* Miner signaling via version bits in block headers
+* Support for both time-based (MTP) and height-based activation
+* Configurable thresholds per deployment
+* Safe activation with minimum activation height
+* Clear failure state if threshold not reached
+
+==Specification==
+
+===Block Version Format===
+
+<pre>
+Bits 29-31: Version bits indicator (must be 001 = 0x20000000)
+Bits 0-28:  Deployment signaling bits (1 = signal support)
+</pre>
+
+===Deployment States===
+
+Each deployment progresses through a state machine:
+
+{| class="wikitable"
+|-
+! State !! Description
+|-
+| DEFINED || Deployment defined but not yet started
+|-
+| STARTED || Signaling period active
+|-
+| LOCKED_IN || Threshold reached, awaiting activation
+|-
+| ACTIVE || Rules enforced (terminal state)
+|-
+| FAILED || Timeout reached without threshold (terminal state)
+|}
+
+===State Transitions===
+
+{| class="wikitable"
+|-
+! Current State !! Condition !! Next State
+|-
+| DEFINED || Start time/height not reached || DEFINED
+|-
+| DEFINED || Start time/height reached || STARTED
+|-
+| STARTED || Timeout reached || FAILED
+|-
+| STARTED || Threshold signals in period || LOCKED_IN
+|-
+| STARTED || Threshold not reached || STARTED
+|-
+| LOCKED_IN || Height < min_activation_height || LOCKED_IN
+|-
+| LOCKED_IN || Height >= min_activation_height || ACTIVE
+|}
+
+===Deployment Parameters===
+
+{| class="wikitable"
+|-
+! Parameter !! Type !! Description
+|-
+| bit || int (0-28) || Version bit for signaling
+|-
+| nStartTime || int64 || Start of signaling (timestamp or height)
+|-
+| nTimeout || int64 || Timeout/failure deadline
+|-
+| min_activation_height || int32 || Minimum height before ACTIVE
+|-
+| use_height_based_activation || bool || Use height instead of MTP
+|-
+| threshold || int || Required signals (default: 90% of period)
+|-
+| period || int || Blocks per signaling period (default: 2016)
+|}
+
+===Special Values===
+
+{| class="wikitable"
+|-
+! Constant !! Value !! Meaning
+|-
+| ALWAYS_ACTIVE || -1 || Deployment is always active
+|-
+| NEVER_ACTIVE || -2 || Deployment is permanently disabled
+|-
+| NO_TIMEOUT || INT64_MAX || No timeout
+|}
+
+===INTcoin Adaptations===
+
+{| class="wikitable"
+|-
+! Aspect !! BIP 9 !! IIP-37
+|-
+| Default threshold || 95% || 90%
+|-
+| Activation timing || MTP only || MTP or height
+|-
+| Period || Fixed 2016 || Configurable
+|-
+| Threshold || Fixed 1916/2016 || Configurable
+|}
+
+IIP-37 intentionally does '''not''' support mandatory lock-in at timeout (BIP 8 LOT=true). If threshold is not reached, the deployment fails.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/consensus/versionbits.cpp src/consensus/versionbits.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0008.mediawiki BIP 8: Version bits with lock-in by height]
+* [https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki BIP 9: Version bits with timeout and delay]
+* [[iip-0003.mediawiki|IIP-3: Version Bits with Timeout and Delay]]
+
+==Copyright==
+
+This document is placed in the public domain.
