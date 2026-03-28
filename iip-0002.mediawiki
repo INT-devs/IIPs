@@ -1,0 +1,139 @@
+<pre>
+  IIP: 2
+  Title: Post-Quantum Signature Scheme (ML-DSA-87)
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-09
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP specifies the use of ML-DSA-87 (formerly known as Dilithium5) as the signature scheme for INTcoin transactions. ML-DSA-87 is a NIST-standardized post-quantum digital signature algorithm that provides security against both classical and quantum computer attacks.
+
+==Motivation==
+
+Classical digital signature schemes like ECDSA are vulnerable to attacks from sufficiently powerful quantum computers using Shor's algorithm. While large-scale quantum computers do not yet exist, the "harvest now, decrypt later" threat model means that cryptocurrency transactions signed today could potentially be forged in the future.
+
+INTcoin addresses this threat from genesis by using exclusively post-quantum cryptography, ensuring long-term security of all transactions.
+
+==Specification==
+
+===Algorithm Parameters===
+
+INTcoin uses ML-DSA-87 (NIST FIPS 204), which provides approximately 256 bits of classical security and 128 bits of quantum security.
+
+{| class="wikitable"
+|-
+! Parameter !! Value
+|-
+| Public Key Size || 2592 bytes
+|-
+| Secret Key Size || 4896 bytes
+|-
+| Signature Size || 4627 bytes
+|-
+| Security Level || NIST Level 5
+|}
+
+===Key Generation===
+
+Keys are generated using the ML-DSA-87 key generation algorithm as specified in FIPS 204. Random bytes are sourced from the operating system's cryptographically secure random number generator.
+
+'''Important''': Unlike ECDSA, ML-DSA-87 public keys cannot be derived from secret keys. Both must be stored together.
+
+===Signature Creation===
+
+Signatures are created over the transaction's signature hash using the ML-DSA-87 signing algorithm:
+
+<pre>
+signature = ML-DSA-87.Sign(secret_key, sighash)
+</pre>
+
+Where <code>sighash</code> is computed as:
+
+<pre>
+sighash = SHA3-256(serialized_transaction || input_index || hash_type || prevout_script || amount)
+</pre>
+
+===Signature Verification===
+
+Verification uses the ML-DSA-87 verification algorithm:
+
+<pre>
+valid = ML-DSA-87.Verify(public_key, sighash, signature)
+</pre>
+
+===Script Integration===
+
+A new opcode <code>OP_CHECKSIG_DILITHIUM</code> (0xAD) is defined for signature verification:
+
+<pre>
+<signature> <pubkey> OP_CHECKSIG_DILITHIUM
+</pre>
+
+The opcode:
+# Pops the public key (2592 bytes) from the stack
+# Pops the signature (4627 bytes) from the stack
+# Computes the signature hash
+# Verifies the signature using ML-DSA-87
+# Pushes 1 (true) or 0 (false) to the stack
+
+===Address Format===
+
+INTcoin addresses use Bech32m encoding with the following prefixes:
+
+{| class="wikitable"
+|-
+! Network !! Prefix !! Witness Version
+|-
+| Mainnet || int1 || 1
+|-
+| Testnet || tint1 || 1
+|-
+| Signet || sint1 || 1
+|-
+| Regtest || rint1 || 1
+|}
+
+The address payload is the SHA3-256 hash of the public key.
+
+==Rationale==
+
+ML-DSA-87 (Dilithium5) was chosen for the following reasons:
+
+# '''NIST Standardization''': Selected as the primary signature algorithm in NIST's Post-Quantum Cryptography standardization process.
+# '''Security Margin''': Level 5 provides the highest security level, appropriate for a cryptocurrency.
+# '''Performance''': Reasonable signing and verification times on modern hardware.
+# '''Maturity''': Extensively analyzed by the cryptographic community since 2017.
+
+The larger key and signature sizes compared to ECDSA are an acceptable trade-off for quantum resistance. Block size limits have been adjusted accordingly.
+
+==Backwards Compatibility==
+
+This is a consensus rule that applies from the genesis block. There is no backwards compatibility concern as INTcoin has never used any other signature scheme.
+
+==Reference Implementation==
+
+The reference implementation uses liboqs 0.15.0:
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/crypto/dilithium.cpp src/crypto/dilithium.cpp]
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/wallet.cpp src/wallet/wallet.cpp]
+
+==Test Vectors==
+
+Test vectors are provided in the INTcoin test suite:
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/test/crypto_tests.cpp src/test/crypto_tests.cpp]
+
+==References==
+
+* [https://csrc.nist.gov/pubs/fips/204/final NIST FIPS 204: Module-Lattice-Based Digital Signature Standard]
+* [https://pq-crystals.org/dilithium/ CRYSTALS-Dilithium]
+* [https://github.com/open-quantum-safe/liboqs liboqs - Open Quantum Safe]
+
+==Copyright==
+
+This document is placed in the public domain.

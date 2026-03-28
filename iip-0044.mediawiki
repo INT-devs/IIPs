@@ -1,0 +1,166 @@
+<pre>
+  IIP: 44
+  Title: HD Wallet Derivation (SHA3-based)
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-09
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP defines a hierarchical deterministic (HD) wallet structure for INTcoin using SHA3-256 (SHAKE256) based key derivation. This replaces the secp256k1-based BIP32 derivation which is incompatible with post-quantum signature schemes.
+
+==Motivation==
+
+BIP32 HD wallets rely on elliptic curve point multiplication for child key derivation, which is fundamentally incompatible with lattice-based signatures like ML-DSA-87. A new derivation scheme is needed that:
+
+# Works with any signature algorithm (algorithm-agnostic)
+# Maintains the hierarchical structure users expect
+# Provides equivalent security properties to BIP32
+# Supports hardened derivation for enhanced security
+
+==Specification==
+
+===Coin Type===
+
+INTcoin uses coin type '''2210''' as registered in SLIP-0044.
+
+===Derivation Path===
+
+INTcoin follows the BIP44-style path structure:
+
+<pre>
+m / purpose' / coin_type' / account' / change / address_index
+</pre>
+
+Where:
+* purpose = 44 (BIP44 compatible)
+* coin_type = 2210 (INTcoin)
+* account = account index (hardened)
+* change = 0 for external (receiving), 1 for internal (change)
+* address_index = sequential index
+
+Example: <code>m/44'/2210'/0'/0/0</code> is the first receiving address of the first account.
+
+===Master Key Generation===
+
+From a BIP39 mnemonic seed:
+
+<pre>
+master_seed = PBKDF2(mnemonic, "mnemonic" + passphrase, 2048, 64, SHA512)
+master_chain_code = SHAKE256(master_seed || 0x00, 32)
+master_secret_key, master_public_key = ML-DSA-87.KeyGen(SHAKE256(master_seed || 0x01, 64))
+</pre>
+
+===Child Key Derivation===
+
+For hardened derivation (index >= 0x80000000):
+
+<pre>
+data = 0x00 || parent_secret_key || index
+intermediate = SHAKE256(parent_chain_code || data, 96)
+child_chain_code = intermediate[0:32]
+child_seed = intermediate[32:96]
+child_secret_key, child_public_key = ML-DSA-87.KeyGen(child_seed)
+</pre>
+
+For non-hardened derivation (index < 0x80000000):
+
+<pre>
+data = parent_public_key || index
+intermediate = SHAKE256(parent_chain_code || data, 96)
+child_chain_code = intermediate[0:32]
+child_seed = intermediate[32:96]
+child_secret_key, child_public_key = ML-DSA-87.KeyGen(child_seed)
+</pre>
+
+'''Note''': Non-hardened derivation requires storing the child seed temporarily, as ML-DSA-87 key generation is not deterministic in the same way as ECDSA.
+
+===Extended Key Serialization===
+
+Extended keys use Bech32 encoding with human-readable prefixes:
+
+{| class="wikitable"
+|-
+! Type !! Prefix !! Approximate Length
+|-
+| Extended Public Key || ixpub || ~3600 characters
+|-
+| Extended Private Key || ixprv || ~10300 characters
+|}
+
+Format:
+<pre>
+version (4 bytes) || depth (1 byte) || parent_fingerprint (4 bytes) ||
+child_index (4 bytes) || chain_code (32 bytes) || key_data
+</pre>
+
+Where key_data is:
+* For ixpub: public_key (2592 bytes)
+* For ixprv: 0x00 || secret_key (4896 bytes) || public_key (2592 bytes)
+
+===Fingerprint Calculation===
+
+<pre>
+fingerprint = SHA3-256(public_key)[0:4]
+</pre>
+
+==Rationale==
+
+===Why SHAKE256?===
+
+SHAKE256 (a SHA3 extendable-output function) provides:
+# Quantum resistance (256-bit security)
+# Arbitrary output length without truncation concerns
+# NIST standardization (FIPS 202)
+
+===Why Store Both Keys?===
+
+ML-DSA-87 cannot derive public keys from secret keys (unlike ECDSA). Extended private keys must contain both for practical usage.
+
+===Large Key Sizes===
+
+The extended key sizes (~10KB for private, ~3.6KB for public) are unavoidable given ML-DSA-87's key sizes. QR code encoding requires chunking or alternative transport mechanisms.
+
+==Backwards Compatibility==
+
+This specification is not compatible with BIP32/BIP44 wallets. INTcoin wallets must implement this IIP-44 specification.
+
+Existing BIP39 mnemonics can be used, but will derive different keys than in Bitcoin wallets.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/hdwallet.cpp src/wallet/hdwallet.cpp]
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/extkey.cpp src/wallet/extkey.cpp]
+
+==Test Vectors==
+
+===Test Vector 1===
+
+Mnemonic:
+<pre>
+abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about
+</pre>
+
+Passphrase: (empty)
+
+Master fingerprint: <code>73c5da0a</code>
+
+Path <code>m/44'/2210'/0'/0/0</code>:
+* Address: <code>int1q...</code> (truncated for brevity)
+
+Full test vectors are in the test suite.
+
+==References==
+
+* [[iip-0002.mediawiki|IIP-2: Post-Quantum Signature Scheme]]
+* [https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki BIP32: Hierarchical Deterministic Wallets]
+* [https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki BIP44: Multi-Account Hierarchy]
+* [https://github.com/satoshilabs/slips/blob/master/slip-0044.md SLIP-0044: Registered coin types]
+
+==Copyright==
+
+This document is placed in the public domain.

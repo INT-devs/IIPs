@@ -1,0 +1,133 @@
+<pre>
+  IIP: 47
+  Title: Extended OP_RETURN for Payment Codes
+  Author: INT Core <team@international-coin.org>
+  Status: Draft
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-15
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP proposes increasing the maximum OP_RETURN data size from 83 bytes to 4096 bytes to accommodate post-quantum payment code notification transactions.
+
+==Motivation==
+
+BIP47 reusable payment codes enable privacy-preserving recurring payments by deriving unique addresses for each transaction between parties. The notification transaction carries the sender's payment code to the recipient.
+
+With INTcoin's post-quantum cryptography:
+* ML-DSA-87 public keys are 2592 bytes
+* Payment code notifications require transmitting key material
+* The current 83-byte OP_RETURN limit is insufficient
+
+Without this change, payment codes cannot be implemented on INTcoin.
+
+==Specification==
+
+===Consensus Rule Change===
+
+The maximum data pushable in an OP_RETURN output is increased from 83 bytes to 4096 bytes.
+
+===Activation===
+
+This change activates via BIP9-style version bits signaling:
+
+{| class="wikitable"
+|-
+! Parameter !! Value
+|-
+| Bit || 4
+|-
+| Name || extended_opreturn
+|-
+| Start Time || Genesis (1773014400)
+|-
+| Timeout || No timeout
+|-
+| Threshold || 90% (mainnet), 75% (testnet)
+|-
+| Min Activation Height || 1000 (mainnet), 100 (testnet)
+|}
+
+===Transaction Validation===
+
+After activation:
+* OP_RETURN outputs with data up to 4096 bytes are standard
+* OP_RETURN outputs remain provably unspendable
+* Multiple OP_RETURN outputs per transaction are NOT permitted
+* Total transaction size limits still apply
+
+===Standardness Rules===
+
+Pre-activation:
+* OP_RETURN data > 83 bytes is non-standard (not relayed)
+
+Post-activation:
+* OP_RETURN data up to 4096 bytes is standard
+* OP_RETURN data > 4096 bytes remains non-standard
+
+==Rationale==
+
+===Why 4KB?===
+
+4096 bytes provides sufficient space for:
+* Full payment code with ML-DSA-87 keys (~2700 bytes)
+* Encrypted metadata
+* Future extensibility
+
+It is small enough to prevent blockchain bloat abuse while enabling legitimate use cases.
+
+===Why Version Bits?===
+
+Version bits activation ensures:
+* Network-wide coordination
+* Miners signal readiness
+* Safe rollout with fallback
+
+===Why Not Multiple OP_RETURNs?===
+
+Keeping the single OP_RETURN rule:
+* Simplifies indexing
+* Prevents circumventing size limits
+* Maintains backward compatibility for parsers
+
+==Backwards Compatibility==
+
+* Pre-activation: Extended OP_RETURN transactions are non-standard but valid
+* Post-activation: All nodes must accept extended OP_RETURN
+* Old wallet software may not recognize extended OP_RETURN data
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/policy/policy.cpp src/policy/policy.cpp]
+* [https://github.com/INT-devs/intcoin/blob/main/src/consensus/tx_verify.cpp src/consensus/tx_verify.cpp]
+
+==Test Vectors==
+
+===Valid Extended OP_RETURN===
+
+<pre>
+OP_RETURN <4000 bytes of data>
+</pre>
+
+Result: Valid and standard (post-activation)
+
+===Invalid Extended OP_RETURN===
+
+<pre>
+OP_RETURN <5000 bytes of data>
+</pre>
+
+Result: Non-standard (not relayed), but consensus-valid
+
+==References==
+
+* [[iip-0002.mediawiki|IIP-2: Post-Quantum Signature Scheme]]
+* [https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki BIP47: Reusable Payment Codes]
+* [https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki BIP9: Version bits]
+
+==Copyright==
+
+This document is placed in the public domain.

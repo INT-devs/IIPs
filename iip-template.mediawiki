@@ -1,0 +1,48 @@
+<pre>
+  IIP: ?
+  Title: <IIP title; maximum 44 characters>
+  Author: <list of authors' real names and email addresses>
+  Status: Draft
+  Type: <Standards Track | Informational | Process>
+  Layer: <Consensus | Peer Services | API/RPC | Applications>
+  Created: <date created on, in ISO 8601 (yyyy-mm-dd) format>
+  License: CC0-1.0
+  Requires: <IIP number(s)>
+  Replaces: <IIP number>
+</pre>
+
+==Abstract==
+
+A short (~200 word) description of the technical issue being addressed.
+
+==Motivation==
+
+The motivation is critical for IIPs that want to change the INTcoin protocol. It should clearly explain why the existing protocol is inadequate to address the problem that the IIP solves.
+
+==Specification==
+
+The technical specification should describe the syntax and semantics of any new feature. The specification should be detailed enough to allow competing, interoperable implementations.
+
+==Rationale==
+
+The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work.
+
+==Backwards Compatibility==
+
+All IIPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The IIP must explain how the author proposes to deal with these incompatibilities.
+
+==Reference Implementation==
+
+The reference implementation must be completed before any IIP is given status "Final", but it need not be completed before the IIP is accepted.
+
+==Test Vectors==
+
+Optional. Test vectors should be included where applicable.
+
+==References==
+
+Links to related documents and prior art.
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,124 @@
+name: IIP Validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate IIPs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Check IIP header format
+      run: |
+        errors=0
+        for file in iip-*.mediawiki; do
+          [ -f "$file" ] || continue
+
+          # Skip template
+          if [ "$file" = "iip-template.mediawiki" ]; then
+            continue
+          fi
+
+          echo "Checking $file..."
+
+          # Check for required headers
+          if ! grep -q "^  IIP:" "$file"; then
+            echo "  ERROR: Missing IIP number"
+            errors=$((errors + 1))
+          fi
+
+          if ! grep -q "^  Title:" "$file"; then
+            echo "  ERROR: Missing Title"
+            errors=$((errors + 1))
+          fi
+
+          if ! grep -q "^  Author:" "$file"; then
+            echo "  ERROR: Missing Author"
+            errors=$((errors + 1))
+          fi
+
+          if ! grep -q "^  Status:" "$file"; then
+            echo "  ERROR: Missing Status"
+            errors=$((errors + 1))
+          fi
+
+          if ! grep -q "^  Type:" "$file"; then
+            echo "  ERROR: Missing Type"
+            errors=$((errors + 1))
+          fi
+
+          if ! grep -q "^  Created:" "$file"; then
+            echo "  ERROR: Missing Created date"
+            errors=$((errors + 1))
+          fi
+
+          # Check for required sections
+          if ! grep -q "^==Abstract==" "$file"; then
+            echo "  ERROR: Missing Abstract section"
+            errors=$((errors + 1))
+          fi
+
+          if ! grep -q "^==Copyright==" "$file"; then
+            echo "  WARNING: Missing Copyright section"
+          fi
+
+          echo "  OK"
+        done
+
+        if [ $errors -gt 0 ]; then
+          echo ""
+          echo "Found $errors error(s)"
+          exit 1
+        fi
+
+        echo ""
+        echo "All IIPs validated successfully"
+
+    - name: Check filename format
+      run: |
+        for file in iip-*.mediawiki; do
+          [ -f "$file" ] || continue
+
+          # Skip template
+          if [ "$file" = "iip-template.mediawiki" ]; then
+            continue
+          fi
+
+          # Check filename matches iip-NNNN.mediawiki
+          if ! echo "$file" | grep -qE '^iip-[0-9]{4}\.mediawiki$'; then
+            echo "ERROR: Invalid filename format: $file"
+            echo "       Expected format: iip-NNNN.mediawiki (4 digits, zero-padded)"
+            exit 1
+          fi
+        done
+
+        echo "All filenames valid"
+
+    - name: Generate IIP index
+      run: |
+        echo "# IIP Index" > /tmp/index.md
+        echo "" >> /tmp/index.md
+        echo "| Number | Title | Status | Type |" >> /tmp/index.md
+        echo "|--------|-------|--------|------|" >> /tmp/index.md
+
+        for file in iip-*.mediawiki; do
+          [ -f "$file" ] || continue
+          [ "$file" = "iip-template.mediawiki" ] && continue
+
+          number=$(grep "^  IIP:" "$file" | sed 's/.*: *//')
+          title=$(grep "^  Title:" "$file" | sed 's/.*: *//')
+          status=$(grep "^  Status:" "$file" | sed 's/.*: *//')
+          type=$(grep "^  Type:" "$file" | sed 's/.*: *//')
+
+          echo "| [$number]($file) | $title | $status | $type |" >> /tmp/index.md
+        done
+
+        echo "" >> /tmp/index.md
+        cat /tmp/index.md

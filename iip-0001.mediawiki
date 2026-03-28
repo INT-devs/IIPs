@@ -1,0 +1,117 @@
+<pre>
+  IIP: 1
+  Title: IIP Purpose and Guidelines
+  Author: INT Core <team@international-coin.org>
+  Status: Active
+  Type: Process
+  Created: 2026-03-28
+</pre>
+
+==Abstract==
+
+An INTcoin Improvement Proposal (IIP) is a design document providing information to the INTcoin community, or describing a new feature for INTcoin or its processes or environment. The IIP should provide a concise technical specification of the feature and a rationale for the feature.
+
+We intend IIPs to be the primary mechanisms for proposing new features, for collecting community input on an issue, and for documenting the design decisions that have gone into INTcoin. The IIP author is responsible for building consensus within the community and documenting dissenting opinions.
+
+Because the IIPs are maintained as text files in a versioned repository, their revision history is the historical record of the feature proposal.
+
+==IIP Types==
+
+There are three kinds of IIP:
+
+* A '''Standards Track''' IIP describes any change that affects most or all INTcoin implementations, such as a change to the network protocol, a change in block or transaction validity rules, or any change or addition that affects the interoperability of applications using INTcoin. Standards Track IIPs consist of two parts, a design document and a reference implementation.
+* An '''Informational''' IIP describes an INTcoin design issue, or provides general guidelines or information to the INTcoin community, but does not propose a new feature. Informational IIPs do not necessarily represent an INTcoin community consensus or recommendation, so users and implementors are free to ignore Informational IIPs or follow their advice.
+* A '''Process''' IIP describes a process surrounding INTcoin, or proposes a change to (or an event in) a process. Process IIPs are like Standards Track IIPs but apply to areas other than the INTcoin protocol itself. They may propose an implementation, but not to INTcoin's codebase; they often require community consensus; unlike Informational IIPs, they are more than recommendations, and users are typically not free to ignore them.
+
+==IIP Work Flow==
+
+The IIP process begins with a new idea for INTcoin. Each potential IIP must have a champion -- someone who writes the IIP using the style and format described below, shepherds the discussions in the appropriate forums, and attempts to build community consensus around the idea. The IIP champion (a.k.a. Author) should first attempt to ascertain whether the idea is IIP-able. Posting to the [https://discord.gg/Y7dX4Ps2Ha Discord #development channel] is the best way to go about this.
+
+Vetting an idea publicly before going as far as writing an IIP is meant to save both the potential author and the wider community time. Asking the INTcoin community first if an idea is original helps prevent too much time being spent on something that is guaranteed to be rejected based on prior discussions.
+
+Once the champion has asked the INTcoin community as to whether an idea has any chance of acceptance, a draft IIP should be presented to the [https://discord.gg/Y7dX4Ps2Ha Discord #development channel]. This gives the author a chance to flesh out the draft IIP to make it properly formatted, of high quality, and to address additional concerns about the proposal.
+
+Following a discussion, the proposal should be submitted to the [https://github.com/INT-devs/IIPs IIPs git repository] as a pull request. This draft must be written in IIP style as described below, and named with an alias such as "iip-johndoe-infiniteints" until the editor has assigned it an IIP number (authors MUST NOT self-assign IIP numbers).
+
+IIP editors will assign the IIP a number, give it a status of "Draft", and merge the pull request. The IIP editors will not unreasonably reject an IIP. Reasons for rejecting IIPs include duplication of effort, disregard for formatting rules, being too unfocused or too broad, being technically unsound, not providing proper motivation or addressing backwards compatibility, or not in keeping with the INTcoin philosophy.
+
+The IIP author may update the Draft as necessary in the git repository. Updates to drafts should also be submitted by the author as pull requests.
+
+===Transferring IIP Ownership===
+
+It occasionally becomes necessary to transfer ownership of IIPs to a new champion. In general, we'd like to retain the original author as a co-author of the transferred IIP, but that's really up to the original author. A good reason to transfer ownership is because the original author no longer has the time or interest in updating it or following through with the IIP process, or has fallen off the face of the 'net.
+
+===IIP Editors===
+
+The current IIP editors are:
+* INT Core Team (<team@international-coin.org>)
+
+===IIP Editor Responsibilities & Workflow===
+
+For each new IIP submitted, an editor does the following:
+
+* Read the IIP to check if it is ready: sound and complete. The ideas must make technical sense, even if they don't seem likely to be accepted.
+* The title should accurately describe the content.
+* Verify the IIP is properly formatted using MediaWiki syntax.
+* Verify licensing terms are acceptable.
+
+If the IIP isn't ready, the editor will send it back to the author for revision, with specific instructions.
+
+Once the IIP is ready for the repository, an IIP editor will:
+
+* Assign an IIP number (generally sequential; editors can sometimes reassign numbers based on special circumstances).
+* Merge the corresponding pull request.
+* Send email or Discord message to the IIP author with next steps.
+
+==IIP Format and Structure==
+
+===Specification===
+
+IIPs should be written in MediaWiki format.
+
+===IIP Header Preamble===
+
+Each IIP must begin with an RFC 822 style header preamble. The headers must appear in the following order:
+
+<pre>
+  IIP: <IIP number, or "?" before being assigned>
+  Title: <IIP title; maximum 44 characters>
+  Author: <list of authors' real names and email addresses>
+  Comments-Summary: <summary tone>
+  Comments-URI: <link to discussion>
+  Status: <Draft | Proposed | Final | Active | Withdrawn | Deferred | Rejected | Replaced>
+  Type: <Standards Track | Informational | Process>
+  Layer: <Consensus | Peer Services | API/RPC | Applications>
+  Created: <date created on, in ISO 8601 (yyyy-mm-dd) format>
+  License: <abbreviation for approved license(s)>
+  Requires: <IIP number(s)>
+  Replaces: <IIP number>
+  Superseded-By: <IIP number>
+</pre>
+
+The Author header lists the names and email addresses of all the authors/owners of the IIP.
+
+The Type header specifies the type of IIP: Standards Track, Informational, or Process.
+
+The Layer header (only for Standards Track IIPs) documents which layer of INTcoin the IIP applies to.
+
+The Created header records the date that the IIP was assigned a number.
+
+===Auxiliary Files===
+
+IIPs may include auxiliary files such as diagrams. Image files should be included in a subdirectory for that IIP. Auxiliary files must be named iip-XXXX-Y.ext, where "XXXX" is the IIP number, "Y" is a serial number (starting at 1), and "ext" is replaced by the actual file extension.
+
+==IIP Licensing==
+
+===Recommended Licenses===
+
+* CC0-1.0: Creative Commons CC0 1.0 Universal
+* CC-BY-4.0: Creative Commons Attribution 4.0 International
+
+===Not Recommended===
+
+All other licenses, including proprietary ones, are not recommended.
+
+==See Also==
+
+* [https://github.com/bitcoin/bips Bitcoin Improvement Proposals (BIPs)]
