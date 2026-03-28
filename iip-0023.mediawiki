@@ -1,0 +1,79 @@
+<pre>
+  IIP: 23
+  Title: URI Scheme
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP proposes a URI scheme for making INTcoin payments. It is adapted from BIP 21 for INTcoin.
+
+==Motivation==
+
+A standard URI scheme enables:
+* Clickable payment links in web pages and emails
+* QR code encoding for mobile payments
+* Application interoperability
+
+==Specification==
+
+===General Format===
+
+<pre>
+intcoin:<address>[?amount=<amount>][&label=<label>][&message=<message>]
+</pre>
+
+===Components===
+
+'''address''': INTcoin address (Bech32m format, starting with int1, tint1, etc.)
+
+'''amount''': Amount in INT (decimal, e.g., "1.5" for 1.5 INT)
+
+'''label''': Label for the address (URL-encoded)
+
+'''message''': Message describing the transaction (URL-encoded)
+
+===Examples===
+
+Simple payment:
+<pre>
+intcoin:int1qr7vy6sqrl8y22zl6rzw59v07e6r3k9unuwe3r9v2snz30swzaqw7wwd24y
+</pre>
+
+Payment with amount:
+<pre>
+intcoin:int1qr7vy6sqrl8y22zl6rzw59v07e6r3k9unuwe3r9v2snz30swzaqw7wwd24y?amount=10.5
+</pre>
+
+Payment with label and message:
+<pre>
+intcoin:int1qr7vy6sqrl8y22zl6rzw59v07e6r3k9unuwe3r9v2snz30swzaqw7wwd24y?amount=10.5&label=Donation&message=Thanks%20for%20your%20support
+</pre>
+
+===Testnet===
+
+Testnet uses the same scheme with testnet addresses:
+<pre>
+intcoin:tint1q...
+</pre>
+
+===Extensions===
+
+Additional query parameters MAY be added for future extensions. Unknown parameters SHOULD be ignored by wallets.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/qt/guiutil.cpp src/qt/guiutil.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki BIP 21: URI Scheme]
+
+==Copyright==
+
+This document is placed in the public domain.

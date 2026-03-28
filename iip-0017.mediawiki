@@ -1,0 +1,94 @@
+<pre>
+  IIP: 17
+  Title: Compact Block Filters
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes the construction of compact block filters using Golomb-Rice coding. It is adapted from BIP 158 for INTcoin.
+
+==Motivation==
+
+Block filters allow light clients to efficiently determine if a block contains relevant transactions. Golomb-Rice coding provides near-optimal compression for the filter data.
+
+==Specification==
+
+===Basic Filter (Type 0)===
+
+The basic filter contains:
+* All scriptPubKeys of outputs created in the block
+* All scriptPubKeys of outputs spent by inputs in the block
+
+===Filter Construction===
+
+# Collect all scripts to include
+# Hash each script: <code>item = SipHash-2-4(k0, k1, script)</code>
+# Sort hashed items
+# Compute differences between consecutive items
+# Encode differences using Golomb-Rice coding
+
+===SipHash Key Derivation===
+
+<pre>
+key_data = SHA3-256(block_hash)
+k0 = key_data[0:8] as uint64_le
+k1 = key_data[8:16] as uint64_le
+</pre>
+
+===Golomb-Rice Parameters===
+
+* P = 19 (parameter for Golomb-Rice coding)
+* M = 784931 (M = 2^P * 1.497137)
+
+===Filter Matching===
+
+To check if a script matches:
+<pre>
+target = SipHash-2-4(k0, k1, script) % (N * M)
+</pre>
+
+Where N is the number of elements in the filter.
+
+===INTcoin Adaptations===
+
+{| class="wikitable"
+|-
+! Component !! BIP 158 !! IIP-17
+|-
+| Key derivation hash || Double SHA256 || SHA3-256
+|-
+| Filter header hash || Double SHA256 || SHA3-256
+|}
+
+==Rationale==
+
+===Why Golomb-Rice?===
+
+* Near-optimal compression for sorted integer differences
+* Simple to implement
+* Fast encoding and decoding
+
+===Why SipHash?===
+
+* Fast hash function suitable for hash tables
+* Keyed, preventing pre-computation attacks
+* 64-bit output matches filter requirements
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/blockfilter/blockfilter.cpp src/blockfilter/blockfilter.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0158.mediawiki BIP 158: Compact Block Filters for Light Clients]
+* [[iip-0016.mediawiki|IIP-16: Client Side Block Filtering]]
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,108 @@
+<pre>
+  IIP: 28
+  Title: Secure Multisig Setup (SMS)
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 25, 35
+</pre>
+
+==Abstract==
+
+This IIP describes the Secure Multisig Setup (SMS) protocol adapted for INTcoin's ML-DSA-87 signatures. It implements BIP 128/129 concepts for INTcoin.
+
+==Motivation==
+
+Setting up multisig wallets requires secure exchange of extended public keys between participants. SMS provides:
+* Encrypted key exchange
+* Verification of all participants
+* Standardized descriptor generation
+
+==Specification==
+
+===Roles===
+
+* '''Coordinator''': Initiates setup, collects keys, generates descriptor
+* '''Signers''': Provide extended public keys, verify final descriptor
+
+===Protocol Flow===
+
+# Coordinator creates session with M-of-N parameters
+# Coordinator generates session token
+# Each signer exports their key record (encrypted with token)
+# Coordinator collects all key records
+# Coordinator generates multisig descriptor
+# All signers verify the descriptor derives expected addresses
+
+===Session Token===
+
+<pre>
+token = Base58Check(random_bytes(20))
+</pre>
+
+===Key Record Format===
+
+<pre>
+Version: 1.0
+Token: <session_token>
+Key: <extended_public_key>
+Derivation: m/48'/2210'/0'/2'
+Fingerprint: <master_fingerprint>
+</pre>
+
+===Encryption===
+
+Key records are encrypted with the session token:
+<pre>
+encrypted = ChaCha20-Poly1305(
+    key = SHA3-256(token),
+    nonce = random(12),
+    plaintext = key_record
+)
+</pre>
+
+===Descriptor Generation===
+
+The coordinator generates a descriptor in the format:
+<pre>
+wsh(sortedmulti(M, [fp1/48'/2210'/0'/2']xpub1/0/*, [fp2/...]xpub2/0/*, ...))
+</pre>
+
+===Verification===
+
+All signers MUST verify:
+# Their key is included correctly
+# First address matches expected value
+# M and N parameters are correct
+
+===INTcoin Adaptations===
+
+{| class="wikitable"
+|-
+! Component !! BIP 129 !! IIP-28
+|-
+| Extended keys || xpub/xprv || ixpub/ixprv
+|-
+| Key size || ~111 chars || ~3600 chars
+|-
+| Signature scheme || ECDSA || ML-DSA-87
+|-
+| Coin type || varies || 2210
+|}
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/bsms_session.cpp src/wallet/bsms_session.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0129.mediawiki BIP 129: Bitcoin Secure Multisig Setup]
+* [[iip-0025.mediawiki|IIP-25: Multisig Derivation Paths]]
+* [[iip-0035.mediawiki|IIP-35: Output Descriptors]]
+
+==Copyright==
+
+This document is placed in the public domain.

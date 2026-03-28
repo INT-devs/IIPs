@@ -1,0 +1,76 @@
+<pre>
+  IIP: 33
+  Title: Bech32m Address Encoding
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 29
+</pre>
+
+==Abstract==
+
+This IIP describes the Bech32m encoding used for INTcoin addresses. It implements BIP 350 for INTcoin.
+
+==Motivation==
+
+Bech32m improves on Bech32 by using a different checksum constant that eliminates a class of errors where certain character substitutions go undetected.
+
+==Specification==
+
+===Checksum Constant===
+
+Bech32m uses constant 0x2bc830a3 instead of Bech32's 0x01.
+
+===Usage===
+
+All INTcoin addresses use Bech32m encoding:
+* Witness version 1 (post-quantum): Bech32m
+
+===Encoding===
+
+<pre>
+def bech32m_encode(hrp, data):
+    values = bech32_hrp_expand(hrp) + data
+    checksum = bech32m_create_checksum(hrp, data)
+    return hrp + "1" + "".join(CHARSET[v] for v in data + checksum)
+
+def bech32m_create_checksum(hrp, data):
+    values = bech32_hrp_expand(hrp) + data
+    polymod = bech32_polymod(values + [0,0,0,0,0,0]) ^ BECH32M_CONST
+    return [(polymod >> 5*(5-i)) & 31 for i in range(6)]
+
+BECH32M_CONST = 0x2bc830a3
+</pre>
+
+===Decoding===
+
+<pre>
+def bech32m_decode(addr):
+    hrp, data = bech32_decode(addr)
+    if bech32_verify_checksum(hrp, data, BECH32M_CONST):
+        return hrp, data[:-6]
+    return None, None
+</pre>
+
+===Error Detection===
+
+Bech32m detects:
+* Up to 4 substitution errors
+* Any single insertion/deletion
+* Most longer error bursts
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/util/bech32.cpp src/util/bech32.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki BIP 350: Bech32m format for v1+ witness addresses]
+* [[iip-0029.mediawiki|IIP-29: Bech32 Address Format]]
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,76 @@
+<pre>
+  IIP: 14
+  Title: Compact Block Relay
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes compact block relay, a method to reduce block propagation bandwidth by transmitting only short transaction identifiers. It is adapted from BIP 152 for INTcoin.
+
+==Motivation==
+
+Blocks often contain transactions already in the receiver's mempool. Compact blocks transmit short transaction IDs, allowing reconstruction from local mempool data, reducing bandwidth by ~90%.
+
+==Specification==
+
+===Messages===
+
+'''sendcmpct''': Announce compact block support
+<pre>
+announce:    bool    // High-bandwidth mode
+version:     uint64  // Protocol version (1 or 2)
+</pre>
+
+'''cmpctblock''': Compact block
+<pre>
+header:      CBlockHeader
+nonce:       uint64
+shortids:    []uint48      // 6-byte transaction IDs
+prefilled:   []PrefilledTx // Transactions included in full
+</pre>
+
+'''getblocktxn''': Request missing transactions
+<pre>
+blockhash:   uint256
+indexes:     []varint
+</pre>
+
+'''blocktxn''': Missing transactions response
+<pre>
+blockhash:   uint256
+txs:         []CTransaction
+</pre>
+
+===Short ID Calculation===
+
+<pre>
+siphash_key = SHA3-256(header || nonce)[0:16]
+shortid = SipHash-2-4(siphash_key, wtxid) & 0xffffffffffff
+</pre>
+
+===High-Bandwidth Mode===
+
+In high-bandwidth mode, nodes send compact blocks immediately without waiting for a request, reducing latency for mining operations.
+
+===INTcoin Adaptation===
+
+* Uses SHA3-256 instead of SHA256 for key derivation
+* wtxid computation uses SHA3-256
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/sync/compactblock.cpp src/sync/compactblock.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0152.mediawiki BIP 152: Compact Block Relay]
+
+==Copyright==
+
+This document is placed in the public domain.

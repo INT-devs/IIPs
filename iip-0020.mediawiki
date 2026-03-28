@@ -1,0 +1,71 @@
+<pre>
+  IIP: 20
+  Title: Ancestor Package Relay
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes package relay for transaction ancestors, enabling CPFP (Child Pays For Parent) across the P2P network. It is adapted from BIP 331 for INTcoin.
+
+==Motivation==
+
+A low-fee parent transaction may be rejected by mempools, preventing a high-fee child from being relayed. Package relay allows the child to "pay for" its parent by evaluating fees as a package.
+
+==Specification==
+
+===Messages===
+
+'''sendpackages''': Signal package relay support
+<pre>
+version:    uint32
+max_count:  uint32  // Max transactions per package
+max_weight: uint32  // Max package weight
+</pre>
+
+'''getpkgtxns''': Request package transactions
+<pre>
+package_wtxids: []uint256
+</pre>
+
+'''pkgtxns''': Package transactions response
+<pre>
+txs: []CTransaction
+</pre>
+
+===Package Validation===
+
+Packages are validated as a unit:
+# All transactions must be valid individually (except fees)
+# Package fee rate = (sum of fees) / (sum of weights)
+# Package must meet minimum relay fee rate
+
+===Package Topology===
+
+Currently supported: child-with-unconfirmed-parents
+* One child transaction
+* One or more unconfirmed parent transactions
+* Parents have no unconfirmed ancestors
+
+===Fee Evaluation===
+
+<pre>
+package_feerate = sum(tx.fee for tx in package) / sum(tx.weight for tx in package)
+</pre>
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/net/packagerelay.cpp src/net/packagerelay.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0331.mediawiki BIP 331: Ancestor Package Relay]
+
+==Copyright==
+
+This document is placed in the public domain.

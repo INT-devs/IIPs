@@ -1,0 +1,71 @@
+<pre>
+  IIP: 10
+  Title: mempool Message
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes the "mempool" P2P message which requests a peer to send inv messages for all transactions in their mempool. It is adapted from BIP 35 for INTcoin.
+
+==Motivation==
+
+The mempool message enables:
+
+* Wallet synchronization without full blockchain rescan
+* Lightweight client transaction awareness
+* Mempool synchronization between nodes
+
+==Specification==
+
+===Message Format===
+
+The "mempool" message has no payload:
+
+<pre>
+mempool message: (empty)
+</pre>
+
+===Response===
+
+Upon receiving a mempool message, a node SHOULD respond with one or more "inv" messages containing the txids of all transactions in its mempool.
+
+<pre>
+inv message:
+  count: varint
+  inventory: [
+    { type: MSG_TX (1), hash: txid },
+    ...
+  ]
+</pre>
+
+===Rate Limiting===
+
+Nodes MAY rate-limit mempool requests to prevent DoS attacks:
+* Maximum 1 mempool request per connection per 60 seconds
+* Peers violating limits may be disconnected
+
+===Permission===
+
+Nodes MAY require the "mempool" permission (via -whitelist) to respond to mempool requests.
+
+==Rationale==
+
+The mempool message provides a simple mechanism for transaction discovery without the complexity of bloom filters (IIP-11).
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/net/protocol.cpp src/net/protocol.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0035.mediawiki BIP 35: mempool message]
+
+==Copyright==
+
+This document is placed in the public domain.

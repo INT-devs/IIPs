@@ -1,0 +1,94 @@
+<pre>
+  IIP: 29
+  Title: Bech32 Address Format
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes the Bech32 address format for INTcoin. It adapts BIP 173 with INTcoin-specific prefixes.
+
+==Motivation==
+
+Bech32 provides:
+* Error detection with BCH codes
+* Case-insensitive encoding
+* Efficient QR code representation
+* Clear separation from legacy formats
+
+==Specification==
+
+===Format===
+
+<pre>
+<hrp>1<data><checksum>
+</pre>
+
+Where:
+* hrp = Human-readable part (network prefix)
+* 1 = Separator
+* data = Base32-encoded witness version and program
+* checksum = 6-character BCH checksum
+
+===Human-Readable Parts===
+
+{| class="wikitable"
+|-
+! Network !! HRP !! Example
+|-
+| Mainnet || int || int1q...
+|-
+| Testnet || tint || tint1q...
+|-
+| Signet || sint || sint1q...
+|-
+| Regtest || rint || rint1q...
+|}
+
+===Witness Version===
+
+INTcoin uses witness version 1 (Bech32m encoding):
+* Version 1: Native post-quantum addresses
+
+===Address Construction===
+
+<pre>
+address = bech32m_encode(hrp, [version] + convertbits(program, 8, 5))
+</pre>
+
+Where program is SHA3-256(public_key).
+
+===Character Set===
+
+Base32 alphabet: qpzry9x8gf2tvdw0s3jn54khce6mua7l
+
+===Checksum===
+
+Bech32m uses the constant 0x2bc830a3 (vs Bech32's 0x01).
+
+===Address Length===
+
+INTcoin addresses are approximately 62 characters:
+* HRP: 3-4 characters
+* Separator: 1 character
+* Version: 1 character
+* Program: 52 characters (32 bytes in base32)
+* Checksum: 6 characters
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/util/bech32.cpp src/util/bech32.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki BIP 173: Base32 address format]
+* [[iip-0030.mediawiki|IIP-30: Bech32m]]
+
+==Copyright==
+
+This document is placed in the public domain.

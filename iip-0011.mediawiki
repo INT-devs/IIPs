@@ -1,0 +1,70 @@
+<pre>
+  IIP: 11
+  Title: Connection Bloom Filtering
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes bloom filters for SPV clients to receive only relevant transactions. It is adapted from BIP 37 for INTcoin.
+
+==Motivation==
+
+Full blocks contain many transactions irrelevant to a particular wallet. Bloom filters allow lightweight clients to receive only transactions matching their addresses, reducing bandwidth significantly.
+
+==Specification==
+
+===Messages===
+
+'''filterload''': Set the bloom filter
+<pre>
+filter:     []byte   // Filter data
+nHashFuncs: uint32   // Number of hash functions
+nTweak:     uint32   // Random tweak
+nFlags:     uint8    // Update flags
+</pre>
+
+'''filteradd''': Add data to the filter
+<pre>
+data: []byte   // Element to add
+</pre>
+
+'''filterclear''': Remove the filter
+<pre>
+(empty)
+</pre>
+
+===Bloom Filter Parameters===
+
+* Maximum filter size: 36,000 bytes
+* Maximum hash functions: 50
+* Hash function: MurmurHash3
+
+===Matching===
+
+A transaction matches the filter if any of:
+* A txid matches
+* An outpoint (txid:vout) matches
+* Any data element in scriptSig matches
+* Any data element in scriptPubKey matches
+
+===Privacy Note===
+
+Bloom filters leak information about wallet addresses. For better privacy, use compact block filters (IIP-16, IIP-17).
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/net/bloom.cpp src/net/bloom.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki BIP 37: Connection Bloom filtering]
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,64 @@
+<pre>
+  IIP: 18
+  Title: Anti-Fee-Sniping Protection
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP recommends setting nLockTime to the current block height for regular transactions to discourage fee sniping by miners. It is adapted from BIP 326 practices for INTcoin.
+
+==Motivation==
+
+Fee sniping is a theoretical attack where miners intentionally re-mine recent blocks to capture high-fee transactions. By setting nLockTime to the current height, transactions cannot be included in earlier blocks, reducing the incentive for this attack.
+
+==Specification==
+
+===Wallet Behavior===
+
+When creating a transaction, wallets SHOULD:
+
+# Set nLockTime to the current block height
+# Set at least one input's nSequence to a value less than 0xffffffff
+
+===Randomization===
+
+To improve privacy, wallets MAY occasionally:
+* Set nLockTime to (current_height - random(0, 100))
+* This prevents fingerprinting based on exact locktime
+
+===Exceptions===
+
+Wallets MAY omit anti-fee-sniping when:
+* Creating time-locked transactions (CLTV/CSV)
+* User explicitly requests immediate finality
+* Creating replacement transactions (RBF)
+
+==Rationale==
+
+===Why This Works===
+
+A transaction with nLockTime=1000 cannot be mined in block 999 or earlier. This means:
+* Block 1000 miners cannot profitably re-mine block 999 to steal the tx
+* The incentive for fee sniping is eliminated
+
+===Privacy Considerations===
+
+Without randomization, nLockTime reveals when the transaction was created. Randomization provides plausible deniability while maintaining protection.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/transactionbuilder.cpp src/wallet/transactionbuilder.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0326.mediawiki BIP 326: Anti-fee-sniping protection]
+
+==Copyright==
+
+This document is placed in the public domain.

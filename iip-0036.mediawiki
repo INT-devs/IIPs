@@ -1,0 +1,119 @@
+<pre>
+  IIP: 36
+  Title: getblocktemplate
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Mining
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes the getblocktemplate RPC for mining pool and solo mining software. It implements BIP 22 for INTcoin.
+
+==Motivation==
+
+getblocktemplate provides:
+* Decentralized block construction (miners choose transactions)
+* Efficient work distribution for pools
+* Transparency in block contents
+
+==Specification==
+
+===Request===
+
+<pre>
+{
+  "jsonrpc": "2.0",
+  "method": "getblocktemplate",
+  "params": [{"rules": ["csv", "segwit"]}],
+  "id": 1
+}
+</pre>
+
+===Response===
+
+<pre>
+{
+  "version": 536870912,
+  "previousblockhash": "00000...",
+  "transactions": [
+    {
+      "data": "01000000...",
+      "txid": "abc123...",
+      "hash": "abc123...",
+      "depends": [],
+      "fee": 10000,
+      "sigops": 1,
+      "weight": 800
+    }
+  ],
+  "coinbaseaux": {},
+  "coinbasevalue": 1051136360000,
+  "target": "00000...",
+  "mintime": 1773014400,
+  "mutable": ["time", "transactions", "prevblock"],
+  "noncerange": "00000000ffffffff",
+  "sigoplimit": 80000,
+  "sizelimit": 4000000,
+  "weightlimit": 16000000,
+  "curtime": 1773014500,
+  "bits": "1f040000",
+  "height": 1
+}
+</pre>
+
+===Block Submission===
+
+<pre>
+{
+  "jsonrpc": "2.0",
+  "method": "submitblock",
+  "params": ["<hex-encoded-block>"],
+  "id": 1
+}
+</pre>
+
+===INTcoin Specifics===
+
+{| class="wikitable"
+|-
+! Field !! INTcoin Value
+|-
+| Block size limit || 4,000,000 bytes
+|-
+| Weight limit || 16,000,000 WU
+|-
+| PoW algorithm || RandomX v2
+|-
+| Coinbase maturity || 100 blocks
+|}
+
+===RandomX Integration===
+
+Mining software must:
+# Initialize RandomX with epoch key
+# Hash block header using RandomX
+# Compare hash to target
+
+<pre>
+epoch_key = "INTcoin-RandomX-Epoch-" + str(height / 2048)
+randomx_init(epoch_key)
+hash = randomx_hash(block_header)
+if hash <= target:
+    submit_block(block)
+</pre>
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/rpc/mining.cpp src/rpc/mining.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0022.mediawiki BIP 22: getblocktemplate - Fundamentals]
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,77 @@
+<pre>
+  IIP: 34
+  Title: DNS Payment Instructions
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes using DNS TXT records to publish payment instructions. It implements BIP 353 for INTcoin.
+
+==Motivation==
+
+Human-readable payment identifiers (user@domain.com) are easier to share than addresses. DNS provides:
+* Familiar format
+* Decentralized infrastructure
+* DNSSEC authentication
+
+==Specification==
+
+===DNS Record Format===
+
+TXT record at: _intcoin-payment.<user>._intcoin.<domain>
+
+<pre>
+intcoin:int1q...?label=Donation
+</pre>
+
+===Lookup Process===
+
+For payment to user@domain.com:
+# Query TXT record: _intcoin-payment.user._intcoin.domain.com
+# Parse URI from response
+# Optionally verify DNSSEC signatures
+
+===URI Format===
+
+Standard IIP-23 URI format:
+<pre>
+intcoin:<address>[?amount=<amount>][&label=<label>]
+</pre>
+
+===DNSSEC===
+
+DNSSEC verification is RECOMMENDED:
+* Prevents DNS spoofing attacks
+* Provides authentication of payment instructions
+
+===Multiple Records===
+
+Multiple TXT records MAY be present for:
+* Different amounts/purposes
+* Fallback addresses
+
+===Example===
+
+DNS record for donations@example.com:
+<pre>
+_intcoin-payment.donations._intcoin.example.com. IN TXT "intcoin:int1qr7vy6sqrl8y22zl6rzw59v07e6r3k9unuwe3r9v2snz30swzaqw7wwd24y?label=Donations"
+</pre>
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/dnspayment.cpp src/wallet/dnspayment.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0353.mediawiki BIP 353: DNS Payment Instructions]
+* [[iip-0023.mediawiki|IIP-23: URI Scheme]]
+
+==Copyright==
+
+This document is placed in the public domain.

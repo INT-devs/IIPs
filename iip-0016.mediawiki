@@ -1,0 +1,94 @@
+<pre>
+  IIP: 16
+  Title: Client Side Block Filtering
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 17
+</pre>
+
+==Abstract==
+
+This IIP describes a P2P protocol for light clients to download compact block filters and use them to determine block relevance. It is adapted from BIP 157 for INTcoin.
+
+==Motivation==
+
+Light clients need to identify blocks containing their transactions. Bloom filters (IIP-11) leak privacy. Compact block filters:
+
+* Are computed once per block by full nodes
+* Allow clients to match locally without revealing addresses
+* Provide better privacy guarantees
+
+==Specification==
+
+===Messages===
+
+'''getcfilters''': Request filters
+<pre>
+filter_type:  uint8    // Filter type (0 = basic)
+start_height: uint32   // Starting block height
+stop_hash:    uint256  // Ending block hash
+</pre>
+
+'''cfilter''': Filter response
+<pre>
+filter_type:  uint8
+block_hash:   uint256
+filter:       []byte   // Golomb-Rice encoded filter
+</pre>
+
+'''getcfheaders''': Request filter headers
+<pre>
+filter_type:  uint8
+start_height: uint32
+stop_hash:    uint256
+</pre>
+
+'''cfheaders''': Filter headers response
+<pre>
+filter_type:    uint8
+stop_hash:      uint256
+previous_header: uint256
+filter_hashes:  []uint256
+</pre>
+
+'''getcfcheckpt''': Request filter checkpoints
+<pre>
+filter_type: uint8
+stop_hash:   uint256
+</pre>
+
+'''cfcheckpt''': Filter checkpoints response
+<pre>
+filter_type:   uint8
+stop_hash:     uint256
+filter_headers: []uint256  // Every 1000 blocks
+</pre>
+
+===Filter Header Chain===
+
+Filter headers form a commitment chain:
+<pre>
+filter_header[0] = SHA3-256(filter[0] || 0x00...00)
+filter_header[n] = SHA3-256(filter[n] || filter_header[n-1])
+</pre>
+
+===INTcoin Adaptation===
+
+* Uses SHA3-256 instead of double-SHA256 for filter headers
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/blockfilter/blockfilterindex.cpp src/blockfilter/blockfilterindex.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0157.mediawiki BIP 157: Client Side Block Filtering]
+* [[iip-0017.mediawiki|IIP-17: Compact Block Filters]]
+
+==Copyright==
+
+This document is placed in the public domain.

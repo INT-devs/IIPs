@@ -1,0 +1,94 @@
+<pre>
+  IIP: 15
+  Title: addrv2 Message
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP introduces the "addrv2" message format supporting variable-length addresses for Tor v3, I2P, and CJDNS networks. It is adapted from BIP 155 for INTcoin.
+
+==Motivation==
+
+The original "addr" message uses fixed 16-byte addresses, insufficient for:
+* Tor v3 onion addresses (32 bytes)
+* I2P addresses (32 bytes)
+* Future network types
+
+==Specification==
+
+===sendaddrv2 Message===
+
+<pre>
+sendaddrv2: (empty)
+</pre>
+
+Sent during handshake to indicate addrv2 support.
+
+===addrv2 Message===
+
+<pre>
+addrv2:
+  count: varint
+  addr_list: [
+    {
+      time:     uint32    // Unix timestamp
+      services: varint    // Service flags
+      networkID: uint8    // Network type
+      addr:     []byte    // Variable-length address
+      port:     uint16    // Port number
+    },
+    ...
+  ]
+</pre>
+
+===Network IDs===
+
+{| class="wikitable"
+|-
+! ID !! Network !! Address Length
+|-
+| 0x01 || IPv4 || 4 bytes
+|-
+| 0x02 || IPv6 || 16 bytes
+|-
+| 0x03 || Tor v2 (deprecated) || 10 bytes
+|-
+| 0x04 || Tor v3 || 32 bytes
+|-
+| 0x05 || I2P || 32 bytes
+|-
+| 0x06 || CJDNS || 16 bytes
+|}
+
+===Tor v3 Address Format===
+
+32-byte ed25519 public key. The full .onion address is derived as:
+<pre>
+onion = base32(pubkey || checksum || version) + ".onion"
+</pre>
+
+===I2P Address Format===
+
+32-byte SHA-256 hash of the I2P destination. The full .b32.i2p address is:
+<pre>
+b32 = base32(hash) + ".b32.i2p"
+</pre>
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/net/protocol.cpp src/net/protocol.cpp]
+* [https://github.com/INT-devs/intcoin/blob/main/src/net/netaddress.cpp src/net/netaddress.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0155.mediawiki BIP 155: addrv2 message]
+
+==Copyright==
+
+This document is placed in the public domain.

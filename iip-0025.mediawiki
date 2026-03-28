@@ -1,0 +1,80 @@
+<pre>
+  IIP: 25
+  Title: Multisig Derivation Paths
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 44
+</pre>
+
+==Abstract==
+
+This IIP defines derivation paths for multisig wallets using SHA3-based HD derivation. It is adapted from BIP 48 for INTcoin.
+
+==Motivation==
+
+Multisig wallets require standardized derivation paths to ensure interoperability between different wallet implementations.
+
+==Specification==
+
+===Derivation Path===
+
+<pre>
+m / purpose' / coin_type' / account' / script_type' / change / address_index
+</pre>
+
+Where:
+* purpose = 48 (multisig)
+* coin_type = 2210 (INTcoin)
+* account = account index
+* script_type = script type identifier
+* change = 0 (external) or 1 (internal)
+* address_index = address index
+
+===Script Types===
+
+{| class="wikitable"
+|-
+! Type !! Value !! Description
+|-
+| P2WSH || 2 || Native multisig
+|}
+
+Note: INTcoin only supports native (Bech32m) addresses.
+
+===Example Paths===
+
+First external address of first P2WSH multisig account:
+<pre>
+m/48'/2210'/0'/2'/0/0
+</pre>
+
+First change address:
+<pre>
+m/48'/2210'/0'/2'/1/0
+</pre>
+
+===Extended Public Key Export===
+
+For multisig coordination, export the extended public key at:
+<pre>
+m/48'/2210'/account'/script_type'
+</pre>
+
+This allows deriving all addresses without exposing private keys.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/hdwallet.cpp src/wallet/hdwallet.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0048.mediawiki BIP 48: Multi-Script Hierarchy for Multi-Sig Wallets]
+* [[iip-0044.mediawiki|IIP-44: HD Wallet Derivation]]
+
+==Copyright==
+
+This document is placed in the public domain.

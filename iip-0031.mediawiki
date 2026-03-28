@@ -1,0 +1,103 @@
+<pre>
+  IIP: 31
+  Title: Message Signing
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 2
+</pre>
+
+==Abstract==
+
+This IIP describes message signing for INTcoin using ML-DSA-87 signatures. It adapts BIP 322 concepts with self-contained signatures.
+
+==Motivation==
+
+Message signing proves address ownership for:
+* Identity verification
+* Contract signing
+* Proof of reserves
+* Authentication systems
+
+==Specification==
+
+===Signature Format===
+
+Unlike ECDSA, ML-DSA-87 signatures cannot recover the public key. INTcoin uses self-contained signatures:
+
+<pre>
+<pubkey_len (2 bytes, big-endian)> <pubkey (2592 bytes)> <signature (4627 bytes)>
+</pre>
+
+Total size: ~7221 bytes, ~9628 characters when Base64 encoded.
+
+===Message Hashing===
+
+<pre>
+message_hash = SHA3-256("INTcoin Signed Message:\n" || message)
+</pre>
+
+===Signing===
+
+<pre>
+signature = ML-DSA-87.Sign(secret_key, message_hash)
+output = encode_pubkey_len(2592) || pubkey || signature
+result = Base64(output)
+</pre>
+
+===Verification===
+
+<pre>
+input = Base64Decode(signature_string)
+pubkey_len = decode_uint16_be(input[0:2])
+pubkey = input[2:2+pubkey_len]
+sig = input[2+pubkey_len:]
+
+message_hash = SHA3-256("INTcoin Signed Message:\n" || message)
+address_hash = SHA3-256(pubkey)
+expected_address = bech32m_encode(hrp, 1, address_hash)
+
+if expected_address != claimed_address:
+    return Invalid("address mismatch")
+
+if !ML-DSA-87.Verify(pubkey, message_hash, sig):
+    return Invalid("signature invalid")
+
+return Valid
+</pre>
+
+===Address Verification===
+
+The signature contains the public key, from which the address is derived. Verification confirms the derived address matches the claimed address.
+
+==Rationale==
+
+===Why Self-Contained?===
+
+ML-DSA-87 (unlike ECDSA) cannot recover public keys from signatures. Including the public key:
+* Enables verification without wallet access
+* Supports offline verification
+* Maintains standard verification flow
+
+===Size Considerations===
+
+The ~9.6KB Base64 signature is large but acceptable for:
+* File-based signatures
+* QR code chunking
+* Text transmission
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/signmessage.cpp src/wallet/signmessage.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0322.mediawiki BIP 322: Generic Signed Message Format]
+* [[iip-0002.mediawiki|IIP-2: Post-Quantum Signature Scheme]]
+
+==Copyright==
+
+This document is placed in the public domain.

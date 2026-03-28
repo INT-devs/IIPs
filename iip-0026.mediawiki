@@ -1,0 +1,84 @@
+<pre>
+  IIP: 26
+  Title: Deterministic Input/Output Ordering
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP specifies lexicographic ordering of transaction inputs and outputs to improve privacy and reduce fingerprinting. It implements BIP 69 for INTcoin.
+
+==Motivation==
+
+Transaction input and output ordering can leak information:
+* Change output position may reveal which output is change
+* Input ordering may indicate wallet software
+* Deterministic ordering improves privacy by standardization
+
+==Specification==
+
+===Input Ordering===
+
+Inputs are sorted lexicographically by:
+# Previous txid (32 bytes, little-endian)
+# Previous output index (4 bytes, little-endian)
+
+<pre>
+sort_key(input) = (input.prevout.hash, input.prevout.n)
+</pre>
+
+===Output Ordering===
+
+Outputs are sorted lexicographically by:
+# Amount (8 bytes, little-endian)
+# ScriptPubKey (variable length)
+
+<pre>
+sort_key(output) = (output.nValue, output.scriptPubKey)
+</pre>
+
+===Algorithm===
+
+<pre>
+def sort_transaction(tx):
+    tx.vin.sort(key=lambda x: (x.prevout.hash, x.prevout.n))
+    tx.vout.sort(key=lambda x: (x.nValue, x.scriptPubKey))
+</pre>
+
+===Exceptions===
+
+Deterministic ordering MAY be skipped when:
+* Using SIGHASH_SINGLE (output position matters)
+* Protocol requires specific ordering
+* User explicitly requests alternative ordering
+
+==Rationale==
+
+===Why Lexicographic?===
+
+* Deterministic: Same inputs always produce same order
+* Simple to implement
+* No information leakage from ordering
+
+===Privacy Benefit===
+
+When all wallets use the same ordering:
+* Change outputs cannot be identified by position
+* Wallet software cannot be fingerprinted by ordering
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/transactionbuilder.cpp src/wallet/transactionbuilder.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0069.mediawiki BIP 69: Lexicographical Indexing of Transaction Inputs and Outputs]
+
+==Copyright==
+
+This document is placed in the public domain.

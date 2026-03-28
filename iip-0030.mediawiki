@@ -1,0 +1,124 @@
+<pre>
+  IIP: 30
+  Title: Partially Signed Transactions (PST)
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 2
+</pre>
+
+==Abstract==
+
+This IIP defines the Partially Signed Transaction (PST) format for INTcoin, enabling multi-party signing, hardware wallet integration, and offline workflows. It adapts BIP 174 (PSBT) for ML-DSA-87 signatures.
+
+==Motivation==
+
+PST enables:
+* Hardware wallet signing without full node
+* Multi-party transaction construction
+* Offline signing workflows
+* CoinJoin-style privacy transactions
+
+==Specification==
+
+===Format===
+
+<pre>
+<magic> <global> <inputs> <outputs>
+
+magic:  0x70 0x73 0x74 0xff 0x00 ("pst\xff\x00")
+</pre>
+
+===Global Fields===
+
+{| class="wikitable"
+|-
+! Type !! Key !! Description
+|-
+| 0x00 || (none) || Unsigned transaction
+|-
+| 0x01 || (none) || Transaction version (if no unsigned tx)
+|-
+| 0xfb || (none) || Version number
+|}
+
+===Per-Input Fields===
+
+{| class="wikitable"
+|-
+! Type !! Key !! Description
+|-
+| 0x00 || (none) || Non-witness UTXO
+|-
+| 0x01 || (none) || Witness UTXO
+|-
+| 0x02 || pubkey || Partial signature
+|-
+| 0x03 || (none) || Sighash type
+|-
+| 0x04 || (none) || Redeem script
+|-
+| 0x05 || (none) || Witness script
+|-
+| 0x06 || pubkey || BIP32 derivation
+|-
+| 0x07 || (none) || Final scriptSig
+|-
+| 0x08 || (none) || Final scriptWitness
+|}
+
+===Per-Output Fields===
+
+{| class="wikitable"
+|-
+! Type !! Key !! Description
+|-
+| 0x00 || (none) || Redeem script
+|-
+| 0x01 || (none) || Witness script
+|-
+| 0x02 || pubkey || BIP32 derivation
+|}
+
+===Roles===
+
+* '''Creator''': Creates PST from inputs/outputs
+* '''Updater''': Adds UTXO and derivation info
+* '''Signer''': Adds signatures
+* '''Combiner''': Merges PSTs from multiple signers
+* '''Finalizer''': Creates final scriptSig/scriptWitness
+* '''Extractor''': Extracts signed transaction
+
+===Serialization===
+
+Key-value format:
+<pre>
+<key_len> <key_type> [key_data] <value_len> <value_data>
+</pre>
+
+Each map ends with 0x00 separator.
+
+===ML-DSA-87 Signatures===
+
+Partial signatures (type 0x02) contain:
+* Key: ML-DSA-87 public key (2592 bytes)
+* Value: ML-DSA-87 signature (4627 bytes)
+
+===Base64 Encoding===
+
+PSTs are transmitted as Base64, starting with "cHN0" (base64 of "pst").
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/pst/pst.cpp src/pst/pst.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki BIP 174: Partially Signed Bitcoin Transaction Format]
+
+==Copyright==
+
+This document is placed in the public domain.

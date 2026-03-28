@@ -1,0 +1,63 @@
+<pre>
+  IIP: 12
+  Title: sendheaders Message
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP introduces the "sendheaders" message which requests that a peer announce new blocks via headers messages rather than inv messages. It is adapted from BIP 130 for INTcoin.
+
+==Motivation==
+
+Headers-first synchronization is more efficient:
+* Headers contain proof-of-work, allowing validation before downloading blocks
+* Reduces round-trips for block announcements
+* Enables parallel block downloads
+
+==Specification==
+
+===sendheaders Message===
+
+<pre>
+sendheaders message: (empty)
+</pre>
+
+After receiving sendheaders, a node SHOULD announce new blocks with "headers" messages instead of "inv" messages.
+
+===Behavior===
+
+Before sendheaders:
+<pre>
+Node A: discovers block
+Node A -> B: inv(block_hash)
+Node B -> A: getheaders(locator)
+Node A -> B: headers(block_header)
+</pre>
+
+After sendheaders:
+<pre>
+Node A: discovers block
+Node A -> B: headers(block_header)
+</pre>
+
+===Headers Message Limit===
+
+A headers message may contain up to 2000 headers.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/net/netprocessing.cpp src/net/netprocessing.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0130.mediawiki BIP 130: sendheaders message]
+
+==Copyright==
+
+This document is placed in the public domain.

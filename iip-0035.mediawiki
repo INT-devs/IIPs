@@ -1,0 +1,121 @@
+<pre>
+  IIP: 35
+  Title: Output Script Descriptors
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 2, 44
+</pre>
+
+==Abstract==
+
+This IIP describes output script descriptors, a language for describing collections of output scripts. It adapts BIP 380 for INTcoin's ML-DSA-87 keys.
+
+==Motivation==
+
+Descriptors provide:
+* Unambiguous description of wallet outputs
+* Import/export of watch-only wallets
+* Derivation of addresses from extended keys
+* Multisig wallet coordination
+
+==Specification==
+
+===Basic Syntax===
+
+<pre>
+DESCRIPTOR = SCRIPT_EXPR [ "#" CHECKSUM ]
+SCRIPT_EXPR = "pk(" KEY ")" | "pkh(" KEY ")" | "wpkh(" KEY ")" |
+              "multi(" THRESH "," KEY {"," KEY}* ")" |
+              "sortedmulti(" THRESH "," KEY {"," KEY}* ")" |
+              "wsh(" SCRIPT_EXPR ")" |
+              "addr(" ADDRESS ")" | "raw(" HEX ")"
+KEY = HEX_PUBKEY | WIF | XPUB | XPRV
+</pre>
+
+===Key Expressions===
+
+'''Hex public key''':
+<pre>
+pk(0a1b2c3d...)  // 2592 bytes = 5184 hex chars
+</pre>
+
+'''Extended public key''':
+<pre>
+wpkh(ixpub1...)           // All addresses
+wpkh(ixpub1.../0/*)       // External chain
+wpkh(ixpub1.../1/*)       // Internal chain
+wpkh(ixpub1.../0/*')      // Hardened derivation
+</pre>
+
+'''With origin''':
+<pre>
+wpkh([73c5da0a/44'/2210'/0']ixpub1.../0/*)
+</pre>
+
+===Script Types===
+
+{| class="wikitable"
+|-
+! Descriptor !! Script Type
+|-
+| pk(KEY) || P2PK (bare pubkey)
+|-
+| pkh(KEY) || P2PKH (pubkey hash)
+|-
+| wpkh(KEY) || P2WPKH (witness pubkey hash)
+|-
+| wsh(SCRIPT) || P2WSH (witness script hash)
+|-
+| multi(k,KEY,...) || k-of-n multisig
+|-
+| sortedmulti(k,KEY,...) || k-of-n with sorted keys
+|}
+
+===Checksum===
+
+8-character checksum using BCH code:
+<pre>
+wpkh(ixpub1...)#abc12345
+</pre>
+
+===INTcoin Adaptations===
+
+{| class="wikitable"
+|-
+! Component !! BIP 380 !! IIP-35
+|-
+| Extended key prefix || xpub/xprv || ixpub/ixprv
+|-
+| Public key size || 33 bytes || 2592 bytes
+|-
+| Signature opcode || OP_CHECKSIG || OP_CHECKSIG_DILITHIUM
+|}
+
+===Examples===
+
+Single key:
+<pre>
+wpkh([73c5da0a/44'/2210'/0'/0/0]ixpub1...)#checksum
+</pre>
+
+2-of-3 multisig:
+<pre>
+wsh(sortedmulti(2,[fp1/48'/2210'/0'/2']ixpub1.../0/*,[fp2/...]ixpub2.../0/*,[fp3/...]ixpub3.../0/*))
+</pre>
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/script/descriptor.cpp src/script/descriptor.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki BIP 380: Output Script Descriptors General Operation]
+* [[iip-0044.mediawiki|IIP-44: HD Wallet Derivation]]
+
+==Copyright==
+
+This document is placed in the public domain.

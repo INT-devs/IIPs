@@ -1,0 +1,60 @@
+<pre>
+  IIP: 22
+  Title: Topology Restrictions for Relay Networks
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes policies for transaction relay to improve privacy and reduce network fingerprinting. It is adapted from BIP 431 concepts for INTcoin.
+
+==Motivation==
+
+Transaction relay timing and topology can leak information about transaction origins. Restrictions on relay behavior improve privacy:
+* Prevent timing-based transaction source identification
+* Reduce effectiveness of spy nodes
+* Improve network partition resistance
+
+==Specification==
+
+===Inbound Connection Limits===
+
+Nodes SHOULD limit transaction relay from inbound connections:
+* Apply random delays before relaying received transactions
+* Rate-limit inv messages per peer
+
+===Outbound Connection Preferences===
+
+For transaction relay, prefer:
+* Block-relay-only connections (2 recommended)
+* Full-relay outbound connections (8 recommended)
+* Avoid heavy reliance on inbound peers
+
+===Transaction Origin Privacy===
+
+# Add random delay (0-5 seconds) before first announcement
+# Announce to outbound peers before inbound peers
+# Use different announcement timing per peer
+
+===Dandelion-like Behavior===
+
+Optionally, nodes MAY implement stem-and-fluff:
+* Stem phase: Relay to single random peer
+* Fluff phase: Normal flooding after random hops
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/net/netprocessing.cpp src/net/netprocessing.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0431.mediawiki BIP 431: Topology Restrictions]
+
+==Copyright==
+
+This document is placed in the public domain.

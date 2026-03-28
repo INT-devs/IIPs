@@ -1,0 +1,71 @@
+<pre>
+  IIP: 21
+  Title: WTXID-Based Transaction Relay
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes transaction relay using witness transaction IDs (wtxids) instead of txids. It is adapted from BIP 339 for INTcoin.
+
+==Motivation==
+
+Txids do not commit to witness data, allowing third-party malleability. Using wtxids for relay:
+* Prevents orphan transaction issues from malleated witnesses
+* Enables more efficient compact block reconstruction
+* Simplifies transaction tracking
+
+==Specification==
+
+===wtxidrelay Message===
+
+<pre>
+wtxidrelay: (empty)
+</pre>
+
+Sent during handshake before "verack" to indicate wtxid relay preference.
+
+===Behavior Changes===
+
+When wtxidrelay is negotiated:
+
+# INV messages use MSG_WTX (0x05) instead of MSG_TX (0x01)
+# GETDATA uses MSG_WTX for transaction requests
+# Transaction tracking uses wtxid keys
+
+===WTXID Calculation===
+
+<pre>
+wtxid = SHA3-256(serialized_transaction_with_witness)
+txid  = SHA3-256(serialized_transaction_without_witness)
+</pre>
+
+For transactions without witness data, wtxid equals txid.
+
+===Inventory Types===
+
+{| class="wikitable"
+|-
+! Type !! Value !! Description
+|-
+| MSG_TX || 1 || Transaction by txid
+|-
+| MSG_WTX || 5 || Transaction by wtxid
+|}
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/net/netprocessing.cpp src/net/netprocessing.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0339.mediawiki BIP 339: WTXID-based transaction relay]
+
+==Copyright==
+
+This document is placed in the public domain.

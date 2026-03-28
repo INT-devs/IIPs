@@ -1,0 +1,98 @@
+<pre>
+  IIP: 32
+  Title: Wallet Labels Export Format
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP defines a format for exporting and importing wallet labels. It implements BIP 329 for INTcoin.
+
+==Motivation==
+
+Users label addresses and transactions for record-keeping. A standard export format enables:
+* Wallet migration
+* Backup of organizational data
+* Sharing labels between devices
+
+==Specification==
+
+===Format===
+
+JSON Lines (JSONL) format, one object per line:
+
+<pre>
+{"type": "tx", "ref": "<txid>", "label": "<label>"}
+{"type": "addr", "ref": "<address>", "label": "<label>"}
+{"type": "pubkey", "ref": "<pubkey_hex>", "label": "<label>"}
+{"type": "input", "ref": "<txid>:<vout>", "label": "<label>"}
+{"type": "output", "ref": "<txid>:<vout>", "label": "<label>"}
+{"type": "xpub", "ref": "<extended_pubkey>", "label": "<label>"}
+</pre>
+
+===Types===
+
+{| class="wikitable"
+|-
+! Type !! Reference Format !! Description
+|-
+| tx || txid (64 hex chars) || Transaction label
+|-
+| addr || Bech32m address || Address label
+|-
+| pubkey || hex-encoded pubkey || Public key label
+|-
+| input || txid:vout || Input label
+|-
+| output || txid:vout || Output label
+|-
+| xpub || ixpub... || Extended public key label
+|}
+
+===Optional Fields===
+
+<pre>
+{
+  "type": "addr",
+  "ref": "int1q...",
+  "label": "Cold storage",
+  "spendable": true,
+  "origin": "m/44'/2210'/0'/0/0"
+}
+</pre>
+
+===File Extension===
+
+Recommended: .labels.jsonl
+
+===Example===
+
+<pre>
+{"type":"addr","ref":"int1qr7vy6sqrl8y22zl6rzw59v07e6r3k9unuwe3r9v2snz30swzaqw7wwd24y","label":"Donation address"}
+{"type":"tx","ref":"abc123...","label":"Payment to vendor"}
+{"type":"addr","ref":"int1q...","label":"Exchange deposit","origin":"m/44'/2210'/0'/0/5"}
+</pre>
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/walletdb.cpp src/wallet/walletdb.cpp]
+
+===RPC Commands===
+
+<pre>
+exportlabels [filename]
+importlabels <filename>
+</pre>
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0329.mediawiki BIP 329: Wallet Labels Export Format]
+
+==Copyright==
+
+This document is placed in the public domain.

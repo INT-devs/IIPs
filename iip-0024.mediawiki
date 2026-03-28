@@ -1,0 +1,94 @@
+<pre>
+  IIP: 24
+  Title: Mnemonic Code for Generating Deterministic Keys
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes the use of mnemonic phrases to generate deterministic wallet seeds. It implements BIP 39 for INTcoin.
+
+==Motivation==
+
+A mnemonic phrase (seed phrase) provides:
+* Human-readable wallet backup
+* Easy transcription and verification
+* Standardized wallet recovery
+
+==Specification==
+
+===Mnemonic Generation===
+
+# Generate random entropy (128-256 bits)
+# Calculate checksum: SHA256(entropy)[0:entropy_bits/32]
+# Append checksum to entropy
+# Split into 11-bit groups
+# Map each group to a word from the wordlist
+
+===Word Counts===
+
+{| class="wikitable"
+|-
+! Entropy (bits) !! Checksum (bits) !! Total (bits) !! Words
+|-
+| 128 || 4 || 132 || 12
+|-
+| 160 || 5 || 165 || 15
+|-
+| 192 || 6 || 198 || 18
+|-
+| 224 || 7 || 231 || 21
+|-
+| 256 || 8 || 264 || 24
+|}
+
+===Seed Generation===
+
+<pre>
+seed = PBKDF2(
+    password = mnemonic_words (space-separated, NFKD normalized),
+    salt = "mnemonic" + passphrase,
+    iterations = 2048,
+    key_length = 64,
+    hash = SHA512
+)
+</pre>
+
+===INTcoin HD Derivation===
+
+The 64-byte seed is used with IIP-44 (SHA3-based HD derivation) to generate ML-DSA-87 keys:
+
+<pre>
+master_chain_code = SHAKE256(seed || 0x00, 32)
+master_key = ML-DSA-87.KeyGen(SHAKE256(seed || 0x01, 64))
+</pre>
+
+===Wordlists===
+
+Standard BIP 39 wordlists are supported:
+* English (2048 words)
+* Japanese, Spanish, Chinese, French, Italian, Korean, Czech, Portuguese
+
+===Passphrase===
+
+An optional passphrase provides:
+* Additional security layer
+* Plausible deniability (different passphrases → different wallets)
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/wallet/mnemonic.cpp src/wallet/mnemonic.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki BIP 39: Mnemonic code for generating deterministic keys]
+* [[iip-0044.mediawiki|IIP-44: HD Wallet Derivation (SHA3-based)]]
+
+==Copyright==
+
+This document is placed in the public domain.

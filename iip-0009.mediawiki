@@ -1,0 +1,139 @@
+<pre>
+  IIP: 9
+  Title: Transaction Signature Verification for ML-DSA-87
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus
+  Created: 2026-03-28
+  License: CC0-1.0
+  Requires: 2
+</pre>
+
+==Abstract==
+
+This IIP defines the transaction digest algorithm for signature verification in INTcoin. It adapts BIP 143's approach for ML-DSA-87 (Dilithium5) post-quantum signatures, providing a deterministic method to compute the message being signed.
+
+==Motivation==
+
+Transaction signature verification requires a well-defined serialization of transaction data. The digest must:
+
+* Be deterministic (same inputs produce same hash)
+* Include all relevant transaction components
+* Prevent signature malleability
+* Support different signature hash types
+
+==Specification==
+
+===Signature Hash Algorithm===
+
+The signature hash is computed as:
+
+<pre>
+sighash = SHA3-256(
+    nVersion          ||  // 4 bytes
+    hashPrevouts      ||  // 32 bytes
+    hashSequence      ||  // 32 bytes
+    outpoint          ||  // 36 bytes (txid + vout)
+    scriptCode        ||  // variable
+    amount            ||  // 8 bytes
+    nSequence         ||  // 4 bytes
+    hashOutputs       ||  // 32 bytes
+    nLockTime         ||  // 4 bytes
+    sighash_type      ||  // 4 bytes
+)
+</pre>
+
+===Component Definitions===
+
+'''hashPrevouts''':
+<pre>
+SHA3-256(txid_0 || vout_0 || txid_1 || vout_1 || ...)
+</pre>
+For SIGHASH_ANYONECANPAY: 32 zero bytes
+
+'''hashSequence''':
+<pre>
+SHA3-256(nSequence_0 || nSequence_1 || ...)
+</pre>
+For SIGHASH_ANYONECANPAY, SIGHASH_SINGLE, SIGHASH_NONE: 32 zero bytes
+
+'''hashOutputs''':
+* SIGHASH_ALL: SHA3-256(all serialized outputs)
+* SIGHASH_SINGLE: SHA3-256(output at same index), or 32 zero bytes if index out of range
+* SIGHASH_NONE: 32 zero bytes
+
+===Signature Hash Types===
+
+{| class="wikitable"
+|-
+! Type !! Value !! Meaning
+|-
+| SIGHASH_ALL || 0x01 || Sign all inputs and outputs
+|-
+| SIGHASH_NONE || 0x02 || Sign all inputs, no outputs
+|-
+| SIGHASH_SINGLE || 0x03 || Sign all inputs, one output
+|-
+| SIGHASH_ANYONECANPAY || 0x80 || Modifier: sign only this input
+|}
+
+===Script Code===
+
+The scriptCode is the executed script with:
+* OP_CODESEPARATOR and preceding opcodes removed
+* For standard P2PKH: the full scriptPubKey
+
+===Differences from BIP 143===
+
+{| class="wikitable"
+|-
+! Component !! BIP 143 !! IIP-9
+|-
+| Hash Function || Double SHA256 || SHA3-256
+|-
+| Signature Scheme || ECDSA || ML-DSA-87
+|-
+| Signature Size || 71-73 bytes || 4627 bytes
+|-
+| Public Key Size || 33 bytes || 2592 bytes
+|}
+
+==Rationale==
+
+===Why SHA3-256?===
+
+* Quantum-resistant (256-bit security)
+* Single hash operation (more efficient than double-SHA256)
+* NIST standardized
+* Consistent with rest of INTcoin
+
+===Component Caching===
+
+hashPrevouts, hashSequence, and hashOutputs can be cached when:
+* Signing multiple inputs
+* SIGHASH_ALL without ANYONECANPAY
+
+This significantly improves signing performance for transactions with many inputs.
+
+==Backwards Compatibility==
+
+This is a consensus rule active from genesis. All INTcoin transactions use this signature hash algorithm.
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/script/interpreter.cpp src/script/interpreter.cpp]
+* [https://github.com/INT-devs/intcoin/blob/main/src/script/sign.cpp src/script/sign.cpp]
+
+==Test Vectors==
+
+See the test suite for comprehensive signature hash test vectors.
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki BIP 143: Transaction Signature Verification]
+* [[iip-0002.mediawiki|IIP-2: Post-Quantum Signature Scheme (ML-DSA-87)]]
+
+==Copyright==
+
+This document is placed in the public domain.

@@ -1,0 +1,75 @@
+<pre>
+  IIP: 27
+  Title: Opt-in Replace-by-Fee
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Applications
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes opt-in Replace-by-Fee (RBF) signaling, allowing unconfirmed transactions to be replaced with higher-fee versions. It implements BIP 125 for INTcoin.
+
+==Motivation==
+
+RBF provides:
+* Fee bumping when transactions are stuck
+* Transaction cancellation (send to self with higher fee)
+* Better fee estimation (start low, bump if needed)
+
+==Specification==
+
+===Signaling===
+
+A transaction signals RBF replaceability if any input has:
+<pre>
+nSequence < 0xffffffff - 1  (i.e., nSequence < 0xfffffffe)
+</pre>
+
+===Replacement Rules===
+
+A replacement transaction must:
+
+# '''Signal RBF''': Original transaction must have signaled
+# '''Spend same inputs''': Must spend at least one of the same inputs
+# '''Higher fee''': Must pay strictly higher total fee
+# '''Higher fee rate''': Must pay higher fee rate than original
+# '''Pay for bandwidth''': Additional fee must cover replacement tx size at min relay fee
+# '''Limited descendants''': Original can have at most 100 descendants
+
+===Fee Calculation===
+
+<pre>
+new_fee > old_fee
+new_fee >= old_fee + (new_size * min_relay_fee_rate)
+</pre>
+
+===Mempool Behavior===
+
+When a valid replacement arrives:
+# Remove original transaction and all descendants
+# Add replacement transaction
+# Re-evaluate dependent transactions
+
+===Wallet Implementation===
+
+Wallets supporting RBF SHOULD:
+* Set nSequence = 0xfffffffd for RBF-enabled inputs
+* Display RBF status in transaction history
+* Provide "Bump Fee" functionality
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/mempool/rbf.cpp src/mempool/rbf.cpp]
+* [https://github.com/INT-devs/intcoin/blob/main/src/qt/dialogs/bumpfeedialog.cpp src/qt/dialogs/bumpfeedialog.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0125.mediawiki BIP 125: Opt-in Full Replace-by-Fee Signaling]
+
+==Copyright==
+
+This document is placed in the public domain.

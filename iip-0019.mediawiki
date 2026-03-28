@@ -1,0 +1,87 @@
+<pre>
+  IIP: 19
+  Title: Erlay Transaction Relay
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Peer Services
+  Created: 2026-03-28
+  License: CC0-1.0
+</pre>
+
+==Abstract==
+
+This IIP describes Erlay, a transaction relay protocol using set reconciliation to reduce bandwidth. It is adapted from BIP 330 for INTcoin.
+
+==Motivation==
+
+Traditional transaction relay floods the network: each transaction is announced to all peers. With 8 connections, each transaction is announced ~8 times. Erlay reduces this to ~1.5 times on average, saving ~40% of transaction relay bandwidth.
+
+==Specification==
+
+===Protocol Overview===
+
+# Nodes exchange transaction announcements via reconciliation instead of flooding
+# Periodically, peers reconcile their transaction sets using Minisketch
+# Only the differences are transmitted
+
+===Messages===
+
+'''sendtxrcncl''': Signal reconciliation support
+<pre>
+version:  uint32  // Protocol version
+salt:     uint64  // Per-connection salt
+</pre>
+
+'''reqtxrcncl''': Request reconciliation
+<pre>
+(empty)
+</pre>
+
+'''sketch''': Set sketch for reconciliation
+<pre>
+sketch_data: []byte  // Minisketch-encoded set
+</pre>
+
+'''reqsketchext''': Request sketch extension
+<pre>
+short_ids: []uint32  // Short IDs needing full wtxids
+</pre>
+
+===Reconciliation Algorithm===
+
+# Alice and Bob each maintain a reconciliation set
+# When reconciling, Alice sends her sketch
+# Bob computes the symmetric difference
+# Bob requests any transactions he's missing
+
+===Short ID Calculation===
+
+<pre>
+short_id = SipHash(salt_alice || salt_bob, wtxid) & 0xffffffff
+</pre>
+
+===Fallback===
+
+If reconciliation fails (too many differences), nodes fall back to traditional inv flooding for that round.
+
+==Rationale==
+
+===Why Minisketch?===
+
+Minisketch enables efficient set reconciliation:
+* O(d) communication where d is set difference
+* Works without knowing which elements differ
+* BCH code-based, well-understood mathematically
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/net/txreconciliation.cpp src/net/txreconciliation.cpp]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0330.mediawiki BIP 330: Transaction announcements reconciliation]
+
+==Copyright==
+
+This document is placed in the public domain.

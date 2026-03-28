@@ -18,6 +18,34 @@ Having an IIP here does not make it a formally accepted standard until its statu
 | [6](iip-0006.mediawiki) | Consensus | OP_CHECKLOCKTIMEVERIFY | INT Core | Standard | Final |
 | [7](iip-0007.mediawiki) | Consensus | Relative Lock-Time Using Sequence Numbers | INT Core | Standard | Final |
 | [8](iip-0008.mediawiki) | Consensus | OP_CHECKSEQUENCEVERIFY | INT Core | Standard | Final |
+| [9](iip-0009.mediawiki) | Consensus | Transaction Signature Verification for ML-DSA-87 | INT Core | Standard | Final |
+| [10](iip-0010.mediawiki) | Peer Services | mempool Message | INT Core | Standard | Final |
+| [11](iip-0011.mediawiki) | Peer Services | Connection Bloom Filtering | INT Core | Standard | Final |
+| [12](iip-0012.mediawiki) | Peer Services | sendheaders Message | INT Core | Standard | Final |
+| [13](iip-0013.mediawiki) | Peer Services | feefilter Message | INT Core | Standard | Final |
+| [14](iip-0014.mediawiki) | Peer Services | Compact Block Relay | INT Core | Standard | Final |
+| [15](iip-0015.mediawiki) | Peer Services | addrv2 Message | INT Core | Standard | Final |
+| [16](iip-0016.mediawiki) | Peer Services | Client Side Block Filtering | INT Core | Standard | Final |
+| [17](iip-0017.mediawiki) | Peer Services | Compact Block Filters | INT Core | Standard | Final |
+| [18](iip-0018.mediawiki) | Peer Services | Anti-Fee-Sniping Protection | INT Core | Standard | Final |
+| [19](iip-0019.mediawiki) | Peer Services | Erlay Transaction Relay | INT Core | Standard | Final |
+| [20](iip-0020.mediawiki) | Peer Services | Ancestor Package Relay | INT Core | Standard | Final |
+| [21](iip-0021.mediawiki) | Peer Services | WTXID-Based Transaction Relay | INT Core | Standard | Final |
+| [22](iip-0022.mediawiki) | Peer Services | Topology Restrictions | INT Core | Standard | Final |
+| [23](iip-0023.mediawiki) | Applications | URI Scheme | INT Core | Standard | Final |
+| [24](iip-0024.mediawiki) | Applications | Mnemonic Code for Deterministic Keys | INT Core | Standard | Final |
+| [25](iip-0025.mediawiki) | Applications | Multisig Derivation Paths | INT Core | Standard | Final |
+| [26](iip-0026.mediawiki) | Applications | Deterministic Input/Output Ordering | INT Core | Standard | Final |
+| [27](iip-0027.mediawiki) | Applications | Opt-in Replace-by-Fee | INT Core | Standard | Final |
+| [28](iip-0028.mediawiki) | Applications | Secure Multisig Setup (SMS) | INT Core | Standard | Final |
+| [29](iip-0029.mediawiki) | Applications | Bech32 Address Format | INT Core | Standard | Final |
+| [30](iip-0030.mediawiki) | Applications | Partially Signed Transactions (PST) | INT Core | Standard | Final |
+| [31](iip-0031.mediawiki) | Applications | Message Signing | INT Core | Standard | Final |
+| [32](iip-0032.mediawiki) | Applications | Wallet Labels Export Format | INT Core | Standard | Final |
+| [33](iip-0033.mediawiki) | Applications | Bech32m Address Encoding | INT Core | Standard | Final |
+| [34](iip-0034.mediawiki) | Applications | DNS Payment Instructions | INT Core | Standard | Final |
+| [35](iip-0035.mediawiki) | Applications | Output Script Descriptors | INT Core | Standard | Final |
+| [36](iip-0036.mediawiki) | Mining | getblocktemplate | INT Core | Standard | Final |
 | [44](iip-0044.mediawiki) | Applications | HD Wallet Derivation (SHA3-based) | INT Core | Standard | Final |
 | [47](iip-0047.mediawiki) | Consensus | Extended OP_RETURN for Payment Codes | INT Core | Standard | Draft |
 
