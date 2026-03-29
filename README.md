@@ -66,6 +66,16 @@ Having an IIP here does not make it a formally accepted standard until its statu
 | [54](iip-0054.mediawiki) | Applications | Lightning DNS Node Discovery | INT Core | Standard | Final |
 | [55](iip-0055.mediawiki) | Applications | Lightning Watchtowers | INT Core | Standard | Draft |
 | [56](iip-0056.mediawiki) | Consensus (soft fork) | Signet | INT Core | Standard | Final |
+| [57](iip-0057.mediawiki) | Consensus (soft fork) | TRUC Transactions | INT Core | Standard | Draft |
+| [58](iip-0058.mediawiki) | Consensus (soft fork) | Ephemeral Dust | INT Core | Standard | Draft |
+| [59](iip-0059.mediawiki) | Peer Services | Package Relay | INT Core | Standard | Draft |
+| [60](iip-0060.mediawiki) | API | Fee Estimation | INT Core | Standard | Draft |
+| [61](iip-0061.mediawiki) | API | ZMQ Notifications | INT Core | Standard | Draft |
+| [62](iip-0062.mediawiki) | API | REST Interface | INT Core | Standard | Draft |
+| [63](iip-0063.mediawiki) | Applications | Coin Statistics Index | INT Core | Standard | Draft |
+| [64](iip-0064.mediawiki) | Applications | Functional Test Framework | INT Core | Informational | Draft |
+| [65](iip-0065.mediawiki) | Applications | Reproducible Builds | INT Core | Informational | Draft |
+| [66](iip-0066.mediawiki) | Applications | Testnet Faucet | INT Core | Standard | Draft |
 
 ## IIP Status Terms
 
