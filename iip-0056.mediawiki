@@ -1,0 +1,211 @@
+<pre>
+  IIP: 56
+  Title: Signet
+  Author: INT Core <team@international-coin.org>
+  Status: Final
+  Type: Standards Track
+  Layer: Consensus (soft fork)
+  Created: 2026-03-29
+  License: CC0-1.0
+  Replaces: N/A
+</pre>
+
+==Abstract==
+
+This IIP defines Signet, a controlled test network where block production is restricted to holders of a specific signing key. Adapted from BIP 325 for INTcoin's post-quantum Dilithium5 signatures.
+
+==Motivation==
+
+Testnet suffers from unpredictable block production, hashrate instability, and spam. Signet solves these by requiring each block to carry a valid signature from a designated authority, providing a stable and predictable test environment while remaining permissionless to use.
+
+==Specification==
+
+===Consensus Parameters===
+
+Two new fields are added to <code>Consensus::Params</code>:
+
+{| class="wikitable"
+|-
+! Field !! Type !! Description
+|-
+| <code>signet_blocks</code> || bool || Whether this network uses signet block signing
+|-
+| <code>signet_challenge</code> || bytes || The challenge script that blocks must satisfy
+|}
+
+===Challenge Script===
+
+The default INTcoin signet challenge script uses a single Dilithium5 authority key:
+
+<pre>
+<authority_pubkey (2592 bytes)> OP_CHECKSIG_DILITHIUM
+</pre>
+
+The authority key is derived deterministically:
+
+<pre>
+seed = "INTcoin Signet Authority 2026"
+seed_hash = SHA3-256(seed)
+(sk, pk) = Dilithium5_KeyGen(seed_hash)
+challenge = pk || OP_CHECKSIG_DILITHIUM
+</pre>
+
+Custom signets can use any valid script via the <code>-signetchallenge</code> CLI option.
+
+===Block Validation===
+
+For signet blocks (when <code>signet_blocks</code> is true), <code>CheckBlock()</code> calls <code>CheckSignetBlockSolution()</code> which:
+
+# Skips validation for the genesis block
+# Returns true immediately if the challenge is empty (permissive mode)
+# Locates the witness commitment output in the coinbase (identified by <code>0xaa21a9ed</code> magic)
+# Extracts the signet solution from the commitment (identified by <code>0xecc7daa2</code> magic)
+# Constructs a virtual transaction pair and verifies the solution satisfies the challenge
+
+===Virtual Transaction Pair===
+
+Following BIP 325, validation constructs two virtual transactions:
+
+====To-Spend Transaction====
+
+{| class="wikitable"
+|-
+! Field !! Value
+|-
+| nVersion || 0
+|-
+| nLockTime || 0
+|-
+| Input scriptSig || Block commitment data
+|-
+| Output scriptPubKey || Challenge script
+|-
+| Output value || 0
+|}
+
+====To-Sign Transaction====
+
+{| class="wikitable"
+|-
+! Field !! Value
+|-
+| nVersion || 0
+|-
+| nLockTime || 0
+|-
+| Input || Spends output 0 of to-spend transaction
+|-
+| Input scriptSig || Signet solution (signature)
+|-
+| Output scriptPubKey || OP_RETURN
+|-
+| Output value || 0
+|}
+
+===Block Commitment Data===
+
+The to-spend transaction's scriptSig contains:
+
+<pre>
+nVersion (4 bytes) || hashPrevBlock (32 bytes) || modified_merkle_root (32 bytes) || nTime (4 bytes)
+</pre>
+
+<code>nBits</code> and <code>nNonce</code> are deliberately excluded so PoW grinding does not invalidate the signature.
+
+The '''modified merkle root''' is computed after stripping the signet solution from the coinbase, avoiding the circular dependency of the signature committing to itself.
+
+===Signet Solution Storage===
+
+The signet solution is appended to the coinbase witness commitment output as additional pushdata:
+
+<pre>
+OP_RETURN
+  OP_PUSHDATA(36) 0xaa21a9ed <witness_merkle_commitment (32 bytes)>
+  OP_PUSHDATA(N)  0xecc7daa2 <signet_solution>
+</pre>
+
+The signet header magic bytes are: <code>0xec 0xc7 0xda 0xa2</code>
+
+===Network Parameters===
+
+{| class="wikitable"
+|-
+! Parameter !! Value
+|-
+| P2P Port || 22210
+|-
+| RPC Port || 22211
+|-
+| Lightning Port || 22216
+|-
+| Magic Bytes || 0x49 0x4e 0x54 0x03 (INT\x03)
+|-
+| Bech32 Prefix || sint
+|-
+| Block Time || 120 seconds
+|-
+| Difficulty || Digishield (same as testnet)
+|}
+
+===DNS Seeds===
+
+* signet-seed1.international-coin.org (US)
+* signet-seed2.international-coin.org (EU)
+* signet-seed3.international-coin.org (UK)
+
+===Lightning DNS Seeds===
+
+* ln-signet1.international-coin.org
+* ln-signet2.international-coin.org
+* ln-signet3.international-coin.org
+
+===Custom Signets===
+
+Users can create their own signet by specifying a different challenge script:
+
+<pre>
+intcoind -signet -signetchallenge=<hex>
+</pre>
+
+Each unique challenge script produces a different network, preventing cross-contamination.
+
+==Differences from BIP 325==
+
+{| class="wikitable"
+|-
+! Aspect !! BIP 325 (Bitcoin) !! IIP-56 (INTcoin)
+|-
+| Signature scheme || ECDSA / Schnorr || ML-DSA-87 (Dilithium5)
+|-
+| Challenge opcode || OP_CHECKSIG / OP_CHECKMULTISIG || OP_CHECKSIG_DILITHIUM
+|-
+| Default challenge || 1-of-2 multisig || Single authority key
+|-
+| Hash function || SHA-256d || SHA3-256
+|-
+| Key derivation || Manual keygen || Deterministic from seed string
+|-
+| Block time || 10 minutes || 2 minutes
+|}
+
+==Security Considerations==
+
+* The signet authority key controls block production but not transaction validity
+* Users can verify all transactions independently
+* The challenge script is public; security relies on the private key
+* Custom signets allow anyone to run their own controlled test network
+
+==Reference Implementation==
+
+* [https://github.com/INT-devs/intcoin/blob/main/src/signet.h src/signet.h]
+* [https://github.com/INT-devs/intcoin/blob/main/src/signet.cpp src/signet.cpp]
+* [https://github.com/INT-devs/intcoin/blob/main/contrib/signet/ contrib/signet/]
+
+==References==
+
+* [https://github.com/bitcoin/bips/blob/master/bip-0325.mediawiki BIP 325: Signet]
+* [https://en.bitcoin.it/wiki/Signet Bitcoin Wiki: Signet]
+
+==Copyright==
+
+This document is placed in the public domain.

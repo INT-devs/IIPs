@@ -65,6 +65,7 @@ Having an IIP here does not make it a formally accepted standard until its statu
 | [53](iip-0053.mediawiki) | Applications | Onion Routing for Lightning | INT Core | Standard | Final |
 | [54](iip-0054.mediawiki) | Applications | Lightning DNS Node Discovery | INT Core | Standard | Final |
 | [55](iip-0055.mediawiki) | Applications | Lightning Watchtowers | INT Core | Standard | Draft |
+| [56](iip-0056.mediawiki) | Consensus (soft fork) | Signet | INT Core | Standard | Final |
 
 ## IIP Status Terms
 
