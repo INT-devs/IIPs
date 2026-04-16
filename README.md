@@ -24,12 +24,13 @@ ranges by layer so related proposals cluster together:
 |-------|-------|-------|
 | 0001–0099 | Process | IIP workflow, editorial policy, governance |
 | 0100–0199 | Consensus | Block validation, soft/hard forks, script rules |
-| 0200–0299 | Peer Services | P2P protocol, transport, message formats |
+| 0200–0299 | Peer Services | P2P protocol, transport, privacy networks, message formats |
 | 0300–0399 | Cryptography | Post-quantum primitives, key formats, signatures |
 | 0400–0499 | Applications | Wallet, address encoding, HD derivation, labels |
 | 0500–0599 | API / RPC | JSON-RPC interface, REST, ZMQ notifications |
 | 0600–0699 | Mining | Proof-of-work, block template, difficulty adjustment |
 | 0700–0799 | Institutional | Custody, RBAC, audit, compliance, external signers |
+| 0800–0899 | Layer 2 | Lightning Network, payment channels, onion routing |
 
 When a range is exhausted, the editors extend it by allocating the next
 available hundred-block. Cross-layer proposals use the range of their
@@ -93,6 +94,7 @@ References sections. See IIP-1 for the full template.
 | Number | Layer | Title | Author | Type | Status |
 |--------|-------|-------|--------|------|--------|
 | [1](iip-0001.md) | | IIP Purpose and Guidelines | INTcoin Core Developers | Process | Active |
+| [2](iip-0002.md) | | Community Governance | INTcoin Core Developers | Process | Draft |
 | [100](iip-0100.md) | Consensus | OP_CHECKSIG_DILITHIUM | INTcoin Core Developers | Standards Track | Final |
 | [101](iip-0101.md) | Consensus | Signet Block Signing | INTcoin Core Developers | Standards Track | Final |
 | [102](iip-0102.md) | Consensus | Replace-By-Fee Signaling | INTcoin Core Developers | Standards Track | Final |
@@ -105,6 +107,11 @@ References sections. See IIP-1 for the full template.
 | [109](iip-0109.md) | Consensus | Duplicate Transaction Output Prevention | INTcoin Core Developers | Standards Track | Final |
 | [110](iip-0110.md) | Consensus | Timewarp Mitigation | INTcoin Core Developers | Standards Track | Final |
 | [111](iip-0111.md) | Consensus | CPFP Topology Restrictions | INTcoin Core Developers | Standards Track | Final |
+| [112](iip-0112.md) | Consensus | AssumeUTXO Snapshots | INTcoin Core Developers | Standards Track | Draft |
+| [113](iip-0113.md) | Consensus | Atomic Swap Protocol | INTcoin Core Developers | Standards Track | Draft |
+| [114](iip-0114.md) | Consensus | OP_CHECKTEMPLATEVERIFY (Covenants) | INTcoin Core Developers | Standards Track | Draft |
+| [115](iip-0115.md) | Consensus | Vault Transactions | INTcoin Core Developers | Standards Track | Draft |
+| [116](iip-0116.md) | Consensus | Dynamic Block Size | INTcoin Core Developers | Standards Track | Draft |
 | [200](iip-0200.md) | Peer Services | Post-Quantum V2 Encrypted Transport | INTcoin Core Developers | Standards Track | Final |
 | [201](iip-0201.md) | Peer Services | Compact Block Relay | INTcoin Core Developers | Standards Track | Final |
 | [202](iip-0202.md) | Peer Services | ADDRv2 Address Format | INTcoin Core Developers | Standards Track | Final |
@@ -117,8 +124,16 @@ References sections. See IIP-1 for the full template.
 | [209](iip-0209.md) | Peer Services | Bloom Filters (Disabled) | INTcoin Core Developers | Standards Track | Final |
 | [210](iip-0210.md) | Peer Services | Package Relay | INTcoin Core Developers | Standards Track | Draft |
 | [211](iip-0211.md) | Peer Services | Reject Messages (Deprecated) | INTcoin Core Developers | Informational | Final |
+| [212](iip-0212.md) | Peer Services | Tor Hidden Service Transport | INTcoin Core Developers | Standards Track | Draft |
+| [213](iip-0213.md) | Peer Services | I2P SAM Transport | INTcoin Core Developers | Standards Track | Draft |
+| [214](iip-0214.md) | Peer Services | CJDNS Transport | INTcoin Core Developers | Standards Track | Draft |
+| [215](iip-0215.md) | Peer Services | Dandelion++ Transaction Relay | INTcoin Core Developers | Standards Track | Draft |
+| [216](iip-0216.md) | Peer Services | Encrypted Mempool Submission | INTcoin Core Developers | Standards Track | Draft |
 | [300](iip-0300.md) | Cryptography | ML-DSA-87 Digital Signature Scheme | INTcoin Core Developers | Standards Track | Final |
 | [301](iip-0301.md) | Cryptography | HD Key Derivation | INTcoin Core Developers | Standards Track | Final |
+| [302](iip-0302.md) | Cryptography | Confidential Transactions | INTcoin Core Developers | Standards Track | Draft |
+| [303](iip-0303.md) | Cryptography | Zero-Knowledge Range Proofs | INTcoin Core Developers | Standards Track | Draft |
+| [304](iip-0304.md) | Cryptography | Post-Quantum Signature Aggregation | INTcoin Core Developers | Informational | Draft |
 | [400](iip-0400.md) | Applications | Address Encoding | INTcoin Core Developers | Standards Track | Final |
 | [402](iip-0402.md) | Applications | Message Signing | INTcoin Core Developers | Standards Track | Final |
 | [403](iip-0403.md) | Applications | Wallet Labels | INTcoin Core Developers | Standards Track | Final |
@@ -132,10 +147,30 @@ References sections. See IIP-1 for the full template.
 | [411](iip-0411.md) | Applications | Anti-Fee-Sniping | INTcoin Core Developers | Standards Track | Final |
 | [412](iip-0412.md) | Applications | Timelock Recovery | INTcoin Core Developers | Standards Track | Draft |
 | [413](iip-0413.md) | Applications | DNS Payment Instructions | INTcoin Core Developers | Standards Track | Draft |
-| [406](iip-0406.md) | Applications | Payjoin | INTcoin Core Developers | Standards Track | Draft |
+| [414](iip-0414.md) | Applications | Hardware Wallet Integration | INTcoin Core Developers | Standards Track | Draft |
+| [415](iip-0415.md) | Applications | CoinJoin Coordination Protocol | INTcoin Core Developers | Standards Track | Draft |
+| [416](iip-0416.md) | Applications | Stealth Addresses | INTcoin Core Developers | Standards Track | Draft |
+| [417](iip-0417.md) | Applications | Ethereum Bridge (Wrapped INT) | INTcoin Core Developers | Standards Track | Draft |
+| [418](iip-0418.md) | Applications | Decentralized Exchange Protocol | INTcoin Core Developers | Standards Track | Draft |
+| [500](iip-0500.md) | API / RPC | ZMQ Notification Protocol | INTcoin Core Developers | Standards Track | Draft |
+| [501](iip-0501.md) | API / RPC | Block Explorer REST API | INTcoin Core Developers | Standards Track | Draft |
+| [502](iip-0502.md) | API / RPC | Exchange Integration Protocol | INTcoin Core Developers | Informational | Draft |
+| [503](iip-0503.md) | API / RPC | Multiprocess IPC Architecture | INTcoin Core Developers | Standards Track | Draft |
 | [600](iip-0600.md) | Mining | RandomX Proof-of-Work | INTcoin Core Developers | Standards Track | Final |
 | [601](iip-0601.md) | Mining | Block Template Protocol | INTcoin Core Developers | Standards Track | Final |
+| [602](iip-0602.md) | Mining | Stratum V2 Mining Protocol | INTcoin Core Developers | Standards Track | Draft |
 | [700](iip-0700.md) | Institutional | Institutional Custody Module | INTcoin Core Developers | Standards Track | Draft |
+| [800](iip-0800.md) | Layer 2 | Lightning Network Protocol | INTcoin Core Developers | Standards Track | Draft |
+| [801](iip-0801.md) | Layer 2 | Lightning Channel Management | INTcoin Core Developers | Standards Track | Draft |
+| [802](iip-0802.md) | Layer 2 | Lightning Invoice Protocol | INTcoin Core Developers | Standards Track | Draft |
+| [803](iip-0803.md) | Layer 2 | Lightning Onion Routing | INTcoin Core Developers | Standards Track | Draft |
+| [804](iip-0804.md) | Layer 2 | Lightning Gossip Protocol | INTcoin Core Developers | Standards Track | Draft |
+| [805](iip-0805.md) | Layer 2 | Lightning Offers | INTcoin Core Developers | Standards Track | Draft |
+| [806](iip-0806.md) | Layer 2 | Lightning Multi-Path Payments | INTcoin Core Developers | Standards Track | Draft |
+| [807](iip-0807.md) | Layer 2 | Lightning Trampoline Routing | INTcoin Core Developers | Standards Track | Draft |
+| [808](iip-0808.md) | Layer 2 | Lightning Channel Splicing | INTcoin Core Developers | Standards Track | Draft |
+| [809](iip-0809.md) | Layer 2 | Lightning Dual-Funded Channels | INTcoin Core Developers | Standards Track | Draft |
+| [810](iip-0810.md) | Layer 2 | Lightning Service Provider Framework | INTcoin Core Developers | Standards Track | Draft |
 
 ## Copyright
 
