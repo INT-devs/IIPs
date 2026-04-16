@@ -92,6 +92,7 @@ References sections. See IIP-1 for the full template.
 
 | Number | Layer | Title | Author | Type | Status |
 |--------|-------|-------|--------|------|--------|
+| [1](iip-0001.md) | | IIP Purpose and Guidelines | INTcoin Core Developers | Process | Active |
 
 ## Copyright
 
