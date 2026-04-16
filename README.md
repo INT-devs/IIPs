@@ -94,12 +94,21 @@ References sections. See IIP-1 for the full template.
 |--------|-------|-------|--------|------|--------|
 | [1](iip-0001.md) | | IIP Purpose and Guidelines | INTcoin Core Developers | Process | Active |
 | [100](iip-0100.md) | Consensus | OP_CHECKSIG_DILITHIUM | INTcoin Core Developers | Standards Track | Final |
-| [103](iip-0103.md) | Consensus | Monetary Policy and Consensus Constants | INTcoin Core Developers | Standards Track | Final |
-| [200](iip-0200.md) | Peer Services | Post-Quantum V2 Encrypted Transport | INTcoin Core Developers | Standards Track | Final |
-| [300](iip-0300.md) | Cryptography | ML-DSA-87 Digital Signature Scheme | INTcoin Core Developers | Standards Track | Final |
-| [301](iip-0301.md) | Cryptography | HD Key Derivation | INTcoin Core Developers | Standards Track | Final |
 | [101](iip-0101.md) | Consensus | Signet Block Signing | INTcoin Core Developers | Standards Track | Final |
 | [102](iip-0102.md) | Consensus | Replace-By-Fee Signaling | INTcoin Core Developers | Standards Track | Final |
+| [103](iip-0103.md) | Consensus | Monetary Policy and Consensus Constants | INTcoin Core Developers | Standards Track | Final |
+| [104](iip-0104.md) | Consensus | Version Bits Deployments | INTcoin Core Developers | Standards Track | Final |
+| [105](iip-0105.md) | Consensus | Height in Coinbase | INTcoin Core Developers | Standards Track | Final |
+| [106](iip-0106.md) | Consensus | OP_CHECKLOCKTIMEVERIFY | INTcoin Core Developers | Standards Track | Final |
+| [107](iip-0107.md) | Consensus | Relative Lock-Time Using nSequence | INTcoin Core Developers | Standards Track | Final |
+| [108](iip-0108.md) | Consensus | OP_CHECKSEQUENCEVERIFY | INTcoin Core Developers | Standards Track | Final |
+| [200](iip-0200.md) | Peer Services | Post-Quantum V2 Encrypted Transport | INTcoin Core Developers | Standards Track | Final |
+| [201](iip-0201.md) | Peer Services | Compact Block Relay | INTcoin Core Developers | Standards Track | Final |
+| [202](iip-0202.md) | Peer Services | ADDRv2 Address Format | INTcoin Core Developers | Standards Track | Final |
+| [203](iip-0203.md) | Peer Services | Compact Block Filters | INTcoin Core Developers | Standards Track | Final |
+| [204](iip-0204.md) | Peer Services | Erlay Transaction Reconciliation | INTcoin Core Developers | Standards Track | Final |
+| [300](iip-0300.md) | Cryptography | ML-DSA-87 Digital Signature Scheme | INTcoin Core Developers | Standards Track | Final |
+| [301](iip-0301.md) | Cryptography | HD Key Derivation | INTcoin Core Developers | Standards Track | Final |
 | [400](iip-0400.md) | Applications | Address Encoding | INTcoin Core Developers | Standards Track | Final |
 | [402](iip-0402.md) | Applications | Message Signing | INTcoin Core Developers | Standards Track | Final |
 | [403](iip-0403.md) | Applications | Wallet Labels | INTcoin Core Developers | Standards Track | Final |
