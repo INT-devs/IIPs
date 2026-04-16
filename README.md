@@ -114,6 +114,8 @@ References sections. See IIP-1 for the full template.
 | [402](iip-0402.md) | Applications | Message Signing | INTcoin Core Developers | Standards Track | Final |
 | [403](iip-0403.md) | Applications | Wallet Labels | INTcoin Core Developers | Standards Track | Final |
 | [404](iip-0404.md) | Applications | Partially Signed Transactions | INTcoin Core Developers | Standards Track | Draft |
+| [405](iip-0405.md) | Applications | Reusable Payment Codes | INTcoin Core Developers | Standards Track | Draft |
+| [406](iip-0406.md) | Applications | Payjoin | INTcoin Core Developers | Standards Track | Draft |
 | [600](iip-0600.md) | Mining | RandomX Proof-of-Work | INTcoin Core Developers | Standards Track | Final |
 | [700](iip-0700.md) | Institutional | Institutional Custody Module | INTcoin Core Developers | Standards Track | Draft |
 
