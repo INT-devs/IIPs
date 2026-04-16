@@ -98,7 +98,14 @@ References sections. See IIP-1 for the full template.
 | [200](iip-0200.md) | Peer Services | Post-Quantum V2 Encrypted Transport | INTcoin Core Developers | Standards Track | Final |
 | [300](iip-0300.md) | Cryptography | ML-DSA-87 Digital Signature Scheme | INTcoin Core Developers | Standards Track | Final |
 | [301](iip-0301.md) | Cryptography | HD Key Derivation | INTcoin Core Developers | Standards Track | Final |
+| [101](iip-0101.md) | Consensus | Signet Block Signing | INTcoin Core Developers | Standards Track | Final |
+| [102](iip-0102.md) | Consensus | Replace-By-Fee Signaling | INTcoin Core Developers | Standards Track | Final |
+| [400](iip-0400.md) | Applications | Address Encoding | INTcoin Core Developers | Standards Track | Final |
+| [402](iip-0402.md) | Applications | Message Signing | INTcoin Core Developers | Standards Track | Final |
+| [403](iip-0403.md) | Applications | Wallet Labels | INTcoin Core Developers | Standards Track | Final |
+| [404](iip-0404.md) | Applications | Partially Signed Transactions | INTcoin Core Developers | Standards Track | Draft |
 | [600](iip-0600.md) | Mining | RandomX Proof-of-Work | INTcoin Core Developers | Standards Track | Final |
+| [700](iip-0700.md) | Institutional | Institutional Custody Module | INTcoin Core Developers | Standards Track | Draft |
 
 ## Copyright
 
