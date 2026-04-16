@@ -1,7 +1,7 @@
 # INTcoin Improvement Proposals (IIPs)
 
 People wishing to submit IIPs should first propose their idea in the
-[IIP Discussions](https://github.com/INT-devs/IIPs/discussions) forum.
+[IIP Discussion](https://github.com/INT-devs/IIPs/discussions/) forum.
 After discussion has produced a mature proposal, the author should open
 a pull request against this repository. IIP numbers are assigned by the
 editors during the review process — do not self-assign a number.
