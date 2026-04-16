@@ -102,6 +102,7 @@ References sections. See IIP-1 for the full template.
 | [106](iip-0106.md) | Consensus | OP_CHECKLOCKTIMEVERIFY | INTcoin Core Developers | Standards Track | Final |
 | [107](iip-0107.md) | Consensus | Relative Lock-Time Using nSequence | INTcoin Core Developers | Standards Track | Final |
 | [108](iip-0108.md) | Consensus | OP_CHECKSEQUENCEVERIFY | INTcoin Core Developers | Standards Track | Final |
+| [109](iip-0109.md) | Consensus | Duplicate Transaction Output Prevention | INTcoin Core Developers | Standards Track | Final |
 | [200](iip-0200.md) | Peer Services | Post-Quantum V2 Encrypted Transport | INTcoin Core Developers | Standards Track | Final |
 | [201](iip-0201.md) | Peer Services | Compact Block Relay | INTcoin Core Developers | Standards Track | Final |
 | [202](iip-0202.md) | Peer Services | ADDRv2 Address Format | INTcoin Core Developers | Standards Track | Final |
