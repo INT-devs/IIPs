@@ -96,5 +96,5 @@ References sections. See IIP-1 for the full template.
 
 ## Copyright
 
-All IIPs are placed in the public domain via
-[CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
+All IIPs are licensed under the
+[MIT License](https://opensource.org/licenses/MIT).
