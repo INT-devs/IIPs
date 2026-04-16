@@ -127,7 +127,7 @@ References sections. See IIP-1 for the full template.
 | [406](iip-0406.md) | Applications | Payjoin | INTcoin Core Developers | Standards Track | Draft |
 | [407](iip-0407.md) | Applications | Bech32 Encoding | INTcoin Core Developers | Standards Track | Final |
 | [408](iip-0408.md) | Applications | Output Descriptors | INTcoin Core Developers | Standards Track | Final |
-| [409](iip-0409.md) | Applications | BSMS Multisig Setup | INTcoin Core Developers | Standards Track | Final |
+| [409](iip-0409.md) | Applications | ISMS Multisig Setup | INTcoin Core Developers | Standards Track | Final |
 | [410](iip-0410.md) | Applications | Multisig HD Derivation Path | INTcoin Core Developers | Standards Track | Final |
 | [411](iip-0411.md) | Applications | Anti-Fee-Sniping | INTcoin Core Developers | Standards Track | Final |
 | [412](iip-0412.md) | Applications | Timelock Recovery | INTcoin Core Developers | Standards Track | Draft |
