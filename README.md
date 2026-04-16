@@ -93,6 +93,12 @@ References sections. See IIP-1 for the full template.
 | Number | Layer | Title | Author | Type | Status |
 |--------|-------|-------|--------|------|--------|
 | [1](iip-0001.md) | | IIP Purpose and Guidelines | INTcoin Core Developers | Process | Active |
+| [100](iip-0100.md) | Consensus | OP_CHECKSIG_DILITHIUM | INTcoin Core Developers | Standards Track | Final |
+| [103](iip-0103.md) | Consensus | Monetary Policy and Consensus Constants | INTcoin Core Developers | Standards Track | Final |
+| [200](iip-0200.md) | Peer Services | Post-Quantum V2 Encrypted Transport | INTcoin Core Developers | Standards Track | Final |
+| [300](iip-0300.md) | Cryptography | ML-DSA-87 Digital Signature Scheme | INTcoin Core Developers | Standards Track | Final |
+| [301](iip-0301.md) | Cryptography | HD Key Derivation | INTcoin Core Developers | Standards Track | Final |
+| [600](iip-0600.md) | Mining | RandomX Proof-of-Work | INTcoin Core Developers | Standards Track | Final |
 
 ## Copyright
 
